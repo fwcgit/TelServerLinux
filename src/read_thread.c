@@ -8,16 +8,16 @@
 
 #include "h_thread.h"
 #include "client_table.h"
-
+#include "crc.h"
 void* read_client(void *args)
 {
     int i                       = 0;
     int maxfd                   = 0;
     int ret                     = 0;
     ssize_t rec                 = 0;
-    ssize_t firstDataOffset         = 0;
     ssize_t totalBytes          = 0;
-    unsigned long packageLen              = 0;
+    ssize_t data_len            = 0;
+    unsigned long packageLen    = 0;
     char buff[1024];
     
     struct timeval tv;
@@ -30,8 +30,6 @@ void* read_client(void *args)
     while(is_run())
     {
         char *data;
-        package *pk                 = NULL;
-        package *cpk                = NULL;
         client_info *info           = NULL;
         void **tableClient          = NULL;
 
@@ -66,62 +64,67 @@ void* read_client(void *args)
                     if(FD_ISSET(info->fd,&read_set))
                     {
                         memset(&buff, 0, sizeof(buff));
-                        rec = recv(info->fd, buff, sizeof(buff), 0);
-                        
+                        rec = recv(info->fd, buff, 8, 0); 
                         if(rec > 0)
                         {
-                            totalBytes      = 0;
-                            firstDataOffset = 0;
-                            pk = (package*)malloc(sizeof(package));
-                            memset(pk, 0, sizeof(package));
-                            
-                            if(rec >= sizeof(msg_head))
+                            totalBytes      += rec;
+                            while(totalBytes < 8)
                             {
-                                memcpy(pk, buff, sizeof(msg_head));
-                                
-                                if(pk->head.ck != M_CK(pk->head))
+                                rec = recv(info->fd, buff, 1, 0);
+                                if(rec <= 0)
                                 {
-                                    printf("no protocol head \r\n");
-                                    continue;
-                                }
-                                
-                                packageLen = pk->head.len;
-                                data = (char *)malloc(sizeof(char)*packageLen);
-                                memset(data, 0, packageLen);
-                                
-                                if(rec > sizeof(package) - sizeof(pk->data))
+                                    printf("read data fail 1 %ld \r\n",rec);
+                                    force_client_close(info);
+                                    break;
+                                } 
+                                totalBytes  += rec;
+                            }
+
+                            if(rec == 8)
+                            {
+                                if(*buff == (unsigned char)0x3b)
                                 {
-                                    firstDataOffset = rec - (sizeof(package) - sizeof(pk->data));
-                                    memcpy(data, buff+sizeof(package) - sizeof(pk->data), firstDataOffset);
-                                }
-                                
-                                if(firstDataOffset < packageLen)
-                                {
-                                    while(totalBytes+firstDataOffset < packageLen)
+                                    uint16 crc = *(buff+6) & 0x00ff;
+                                    crc <<= 8;
+                                    crc |= *(buff+7);
+
+                                    uint16 code_crc = CRC16(buff,8-2);
+                                    if(crc == code_crc)
                                     {
-                                        rec = recv(info->fd,data+firstDataOffset+totalBytes,sizeof(buff),0);
-                                        if(rec <=0)
+                                        data_len =  *(buff+1) & 0x000000ff;
+                                        data_len <<= 8;
+                                        data_len |= *(buff+2);
+                                        data_len <<= 8;
+                                        data_len |= *(buff+3);
+                                        data_len <<= 8;
+                                        data_len |= *(buff+4);
+
+                                        while(totalBytes < data_len)
                                         {
-                                            printf("read data fail 1 %ld \r\n",rec);
-                                            force_client_close(info);
-                                            break;
+                                             rec = recv(info->fd, buff, data_len, 0);
+                                            if(rec <= 0)
+                                            {
+                                                printf("read data fail 1 %ld \r\n",rec);
+                                                force_client_close(info);
+                                                break;
+                                            } 
+                                            totalBytes  += rec;
                                         }
-                                        else
+
+                                        if(totalBytes == data_len)
                                         {
-                                            totalBytes+=rec;
+                                            char *data = (char *)malloc(sizeof(char) * data_len - 8);
+                                            package *pk = (package *)malloc(sizeof(package));
+                                            memcpy(data,buff+8,data_len-8);
+                                            pk->head.type = *(buff+5);
+                                            pk->fd    = info->fd;
+                                            pk->data  = data;
+                                            add_list(list, pk);
+                                            printf("recv %s Len:%ld\n",data,packageLen);
                                         }
                                     }
                                 }
-                                
-                                if(totalBytes+firstDataOffset >= packageLen)
-                                {
-                                    pk->fd    = info->fd;
-                                    pk->data  = data;
-                                    add_list(list, pk);
-                                    printf("recv %s Len:%ld\n",data,packageLen);
-                                }
                             }
-                            
                         }
                         else if(rec <= 0)
                         {
