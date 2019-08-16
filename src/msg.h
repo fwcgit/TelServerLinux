@@ -13,6 +13,7 @@
 #define MSG_TYPE_CMD    0x02 //执行指令
 #define MSG_TYPE_DATA   0x03 //数据
 #define MSG_TYPE_HEART  0x04 //心跳
+#define FRAME_HEAD_SIZE 8
 
 typedef struct m_head
 {

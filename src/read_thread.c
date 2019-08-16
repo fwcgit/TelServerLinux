@@ -64,13 +64,13 @@ void* read_client(void *args)
                     if(FD_ISSET(info->fd,&read_set))
                     {
                         memset(&buff, 0, sizeof(buff));
-                        rec = recv(info->fd, buff, 8, 0); 
+                        rec = recv(info->fd, buff, FRAME_HEAD_SIZE, 0); 
                         if(rec > 0)
                         {
-                            totalBytes      += rec;
-                            while(totalBytes < 8)
+                            totalBytes += rec;
+                            while(totalBytes < FRAME_HEAD_SIZE)
                             {
-                                rec = recv(info->fd, buff, 1, 0);
+                                rec = recv(info->fd, buff+totalBytes, 1, 0);
                                 if(rec <= 0)
                                 {
                                     printf("read data fail 1 %ld \r\n",rec);
@@ -80,7 +80,7 @@ void* read_client(void *args)
                                 totalBytes  += rec;
                             }
 
-                            if(rec == 8)
+                            if(rec == FRAME_HEAD_SIZE)
                             {
                                 if(*buff == (unsigned char)0x3b)
                                 {
@@ -88,7 +88,7 @@ void* read_client(void *args)
                                     crc <<= 8;
                                     crc |= *(buff+7);
 
-                                    uint16 code_crc = CRC16(buff,8-2);
+                                    uint16 code_crc = CRC16(buff,FRAME_HEAD_SIZE-2);
                                     if(crc == code_crc)
                                     {
                                         data_len =  *(buff+1) & 0x000000ff;
@@ -101,7 +101,7 @@ void* read_client(void *args)
 
                                         while(totalBytes < data_len)
                                         {
-                                             rec = recv(info->fd, buff, data_len, 0);
+                                             rec = recv(info->fd, buff+totalBytes, data_len, 0);
                                             if(rec <= 0)
                                             {
                                                 printf("read data fail 1 %ld \r\n",rec);
@@ -113,14 +113,22 @@ void* read_client(void *args)
 
                                         if(totalBytes == data_len)
                                         {
-                                            char *data = (char *)malloc(sizeof(char) * data_len - 8);
-                                            package *pk = (package *)malloc(sizeof(package));
-                                            memcpy(data,buff+8,data_len-8);
-                                            pk->head.type = *(buff+5);
-                                            pk->fd    = info->fd;
-                                            pk->data  = data;
-                                            add_list(list, pk);
-                                            printf("recv %s Len:%ld\n",data,packageLen);
+                                            uint16 crc_data = *(buff+(data_len-2)) &0x00ff;
+                                            crc_data <<= 8;
+                                            crc_data |=  *(buff+(data_len-2));
+                                            uint16 crc_data_code = CRC16(buff+FRAME_HEAD_SIZE,data_len -2-FRAME_HEAD_SIZE);
+                                            if(crc_data == crc_data_code)
+                                            {
+                                                char *data = (char *)malloc(sizeof(char) * (data_len -2-FRAME_HEAD_SIZE));
+                                                memcpy(data,buff+FRAME_HEAD_SIZE,data_len-2-FRAME_HEAD_SIZE);
+                                                package *pk = (package *)malloc(sizeof(package));
+                                                pk->head.type = *(buff+5);
+                                                pk->fd    = info->fd;
+                                                pk->data  = data;
+                                                add_list(list, pk);
+                                                printf("recv %s Len:%ld\n",data,packageLen);
+                                            }
+
                                         }
                                     }
                                 }
