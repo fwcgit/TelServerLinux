@@ -10,7 +10,7 @@
 #include "client_info.h"
 #include "client_table.h"
 #include <time.h>
-
+#include "crc.h"
 int LISTENER_PORT;
 
 void starp_server(void)
@@ -35,7 +35,41 @@ void init(void)
 	LISTENER_PORT = 28866;
 }
 
-ssize_t send_data(int fd,char *data,size_t len)
+void printOldData(char *data,ssize_t len)
+{
+#if 1
+    int i = 0;
+    if(NULL != data && len > 0){
+        for(i = 0; i < len; i++)
+        {
+                printf("%02X",*(data+i));
+        }
+    }
+ #endif
+}
+
+ssize_t send_data_pack(int fd,char type,char *data,size_t len)
+{
+        int data_len = FRAME_HEAD_SIZE+2+len;
+        char *user_data = (char *)malloc(sizeof(char) * data_len);
+        *user_data = 0x3b;
+        *(user_data+1) = (char)(data_len >> 24);
+        *(user_data+2) = (char)(data_len >> 16);
+        *(user_data+3) = (char)(data_len >> 8);
+        *(user_data+4) = (char)(data_len >> 0);
+        *(user_data+5) = type;
+        uint16_t crc_code = CRC16((unsigned char *)user_data,6);
+        *(user_data+6) = (char)(crc_code>>8);
+        *(user_data+7) = (char)(crc_code>>0);
+        uint16_t crc_data = CRC16((unsigned char *)data,len);
+        *(user_data+(data_len-2)) = (char)(crc_data>>8);
+        *(user_data+(data_len-1)) = (char)(crc_data>>0);
+        memcpy(user_data+FRAME_HEAD_SIZE,data,len);
+        printOldData(user_data,data_len);
+        ssize_t s_len = send_data(fd,type,user_data,data_len);
+        return s_len;
+}
+ssize_t send_data(int fd,char type,char *data,size_t len)
 {
     
     ssize_t s_len;
@@ -74,7 +108,7 @@ ssize_t send_data(int fd,char *data,size_t len)
     return ret;
 }
 
-ssize_t send_user(char *session,char *data,size_t len)
+ssize_t send_user(char *session,char type,char *data,size_t len)
 {
     client_info *ci = get_client(session);
     ssize_t ret = 0;
@@ -82,7 +116,7 @@ ssize_t send_user(char *session,char *data,size_t len)
     {
         printf("send user client \n");
         printf("send user client %s \n",ci->code);
-        ret = send_data(ci->fd, data, len);
+        ret = send_data_pack(ci->fd,type, data, len);
     }
     else
     {

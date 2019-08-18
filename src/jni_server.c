@@ -44,21 +44,16 @@ JNIEXPORT jlong JNICALL Java_com_fu_server_ServerLib_sendCmd
 (JNIEnv *env, jobject obj, jstring session, jbyte cmd)
 {
     ssize_t ret;
-    package pk;
     const char *c_session;
     char *user_s;
     
     c_session = (*env)->GetStringUTFChars(env,session,0);
-    user_s = (char *)malloc(sizeof(char) * (strlen(c_session)));
+  
+    char *data = (char *)malloc(sizeof(char));
+    memcpy(data, (char*)&cmd, 1);
+    ret = send_user(user_s,MSG_TYPE_CMD,data,1);
     
-    pk.head.type = MSG_TYPE_CMD;
-    pk.head.len = 1;
-    pk.head.ck = M_CK(pk.head);
-    pk.data = (char *)malloc(sizeof(char));
-    memcpy(pk.data, (char*)&cmd, 1);
-    ret = send_user(user_s,(char*)&pk,sizeof(msg_head));
-    
-    free(pk.data);
+    free(data);
     free(user_s);
     
     return ret;
@@ -75,21 +70,10 @@ JNIEXPORT jlong JNICALL Java_com_fu_server_ServerLib_sendData
     jbyte *j_bytes = (*env)->GetByteArrayElements(env,bytes,0);
     jbyte data[len];
     memcpy(data,j_bytes,len);
-
     c_session = (*env)->GetStringUTFChars(env,session,0);
- 
-    package msg;
-    msg.fd = 0;
-    msg.head.type = MSG_TYPE_DATA;
-    msg.head.len = len;
-    msg.head.ck  = M_CK(msg.head);
-    msg.head.crc  = CRC16((unsigned char *)data, len);
-    msg.data = malloc(sizeof(char) * (M_SIZE + msg.head.len));
-    
-    pack_data(msg.data,&msg,M_SIZE,(char *)data,msg.head.len);
-    send_user((char *)c_session, msg.data, M_SIZE + msg.head.len);
 
-    free(msg.data);
+    send_user((char *)c_session, MSG_TYPE_DATA,(char *)data, len);
+
     if(j_bytes)
     {
       (*env)->ReleaseByteArrayElements(env,bytes, j_bytes, 0);

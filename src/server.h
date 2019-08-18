@@ -22,9 +22,11 @@ void init(void);
 
 void stop_server(void);
 
-ssize_t send_data(int fd,char *data,size_t len);
+ssize_t send_data_pack(int fd,char type,char *data,size_t len);
 
-ssize_t send_user(char *session,char *data,size_t len);
+ssize_t send_data(int fd,char type,char *data,size_t len);
+
+ssize_t send_user(char *session,char type,char *data,size_t len);
 
 client_info *get_client_list(int *count);
 

@@ -58,7 +58,7 @@ void* handle_msg(void *args)
                     ret = sync_heartbeat_handle(key);
                    if(ret == 0)
                    {
-                      
+                       sync_heartbeat_handle(key);
                    }
                     
                     printf("recv heartbeat %s \n",key);

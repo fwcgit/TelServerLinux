@@ -54,7 +54,7 @@ void* accept_client(void *args)
  
             accept_client_tbl(new_fd);
             
-            send_data(new_fd, reqCode, strlen(reqCode));
+            send_data_pack(new_fd, MSG_TYPE_ID,reqCode, strlen(reqCode));
             
             printf("connected client ip:%s new_fd:%d ret:%d \n", inet_ntoa(client_in.sin_addr),new_fd,ret);
 		

@@ -58,8 +58,10 @@ void* read_client(void *args)
             
             if(NULL != tableClient)
             {
+                
                 for(i = 0 ; i < count ;i++)
                 {
+                    totalBytes = 0;
                      info = (client_info *)(*(tableClient+i));
                     if(FD_ISSET(info->fd,&read_set))
                     {
@@ -82,22 +84,25 @@ void* read_client(void *args)
 
                             if(rec == FRAME_HEAD_SIZE)
                             {
-                                if(*buff == (unsigned char)0x3b)
+                                if(*buff == 0x3b)
                                 {
+                                    printf("--------------\r\n");
                                     uint16 crc = *(buff+6) & 0x00ff;
                                     crc <<= 8;
-                                    crc |= *(buff+7);
+                                    crc |= *(buff+7)& 0x00ff;
 
-                                    uint16 code_crc = CRC16(buff,FRAME_HEAD_SIZE-2);
+                                    uint16 code_crc = CRC16((unsigned char *)buff,FRAME_HEAD_SIZE-2);
                                     if(crc == code_crc)
                                     {
+                
+                                        printf("-------crc-------\r\n");
                                         data_len =  *(buff+1) & 0x000000ff;
                                         data_len <<= 8;
-                                        data_len |= *(buff+2);
+                                        data_len |= *(buff+2)& 0x000000ff;
                                         data_len <<= 8;
-                                        data_len |= *(buff+3);
+                                        data_len |= *(buff+3)& 0x000000ff;
                                         data_len <<= 8;
-                                        data_len |= *(buff+4);
+                                        data_len |= *(buff+4)& 0x000000ff;
 
                                         while(totalBytes < data_len)
                                         {
@@ -111,18 +116,22 @@ void* read_client(void *args)
                                             totalBytes  += rec;
                                         }
 
+                                        printf("----%ld---totalBytes---%ld----\r\n",totalBytes,data_len);
                                         if(totalBytes == data_len)
                                         {
+                                            printf("-------totalBytes-------\r\n");
                                             uint16 crc_data = *(buff+(data_len-2)) &0x00ff;
                                             crc_data <<= 8;
-                                            crc_data |=  *(buff+(data_len-2));
-                                            uint16 crc_data_code = CRC16(buff+FRAME_HEAD_SIZE,data_len -2-FRAME_HEAD_SIZE);
+                                            crc_data |=  *(buff+(data_len-1))&0x00ff;
+                                            int user_data_len = data_len -2-FRAME_HEAD_SIZE;
+                                            uint16 crc_data_code = CRC16((unsigned char *)(buff+FRAME_HEAD_SIZE),user_data_len);
                                             if(crc_data == crc_data_code)
                                             {
-                                                char *data = (char *)malloc(sizeof(char) * (data_len -2-FRAME_HEAD_SIZE));
-                                                memcpy(data,buff+FRAME_HEAD_SIZE,data_len-2-FRAME_HEAD_SIZE);
+                                                char *data = (char *)malloc(sizeof(char) * user_data_len);
+                                                memcpy(data,buff+FRAME_HEAD_SIZE,user_data_len);
                                                 package *pk = (package *)malloc(sizeof(package));
                                                 pk->head.type = *(buff+5);
+                                                pk->head.len = user_data_len;
                                                 pk->fd    = info->fd;
                                                 pk->data  = data;
                                                 add_list(list, pk);
@@ -130,6 +139,8 @@ void* read_client(void *args)
                                             }
 
                                         }
+
+                                        
                                     }
                                 }
                             }

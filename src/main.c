@@ -43,38 +43,17 @@ char* int_to_str(int val)
 void send_test_data(void)
 {
     char text[4096 * 10];
-
-    package msg;
-    msg.fd = 0;
     memset(text, 'C', 4096 * 10);
-    msg.head.type = MSG_TYPE_DATA;
-    msg.head.len = 4096 * 10;
-    msg.head.ck  = M_CK(msg.head);
-    msg.head.crc  = CRC16((unsigned char *)text, 4096 * 10);
-    msg.data = malloc(sizeof(char) * (sizeof(package) - sizeof(void *) + msg.head.len));
-    pack_data(msg.data,&msg,sizeof(package) - sizeof(void *),text,msg.head.len);
-    
-    printf("send_user len %ld \r\n",sizeof(package) - sizeof(void *) + msg.head.len);
-    send_user(key, msg.data, sizeof(package) - sizeof(void *) + msg.head.len);
-    free(msg.data);
+    printf("send_user\r\n");
+    send_user(key, MSG_TYPE_DATA,text, 4096 * 10);
 }
 
 void send_txt_data(void)
 {
-    char *text = "zxcvvvvv";
-    
-    package msg;
-    msg.fd = 0;
-    msg.head.type = MSG_TYPE_DATA;
-    msg.head.len = 8;
-    msg.head.ck  = M_CK(msg.head);
-    msg.head.crc  = CRC16((unsigned char *)text, 8);
-    msg.data = malloc(sizeof(char) * (sizeof(package) - sizeof(void *) + msg.head.len));
-    pack_data(msg.data,&msg,sizeof(package) - sizeof(void *),text,msg.head.len);
-    
-    printf("send_user len %ld \r\n",sizeof(package) - sizeof(void *) + msg.head.len);
-    send_user(key, msg.data, sizeof(package) - sizeof(void *) + msg.head.len);
-    free(msg.data);
+    char text[10];
+    memset(text, 'A',10);
+    printf("send_user\r\n");
+    send_user(key, MSG_TYPE_DATA,text, 10);
 }
 
 int main(int argc, const char * argv[]) {
