@@ -48,6 +48,24 @@ void send_test_data(void)
     send_user(key, MSG_TYPE_DATA,text, 4096 * 10);
 }
 
+void send_lar_data(void)
+{
+    char cmd[2];
+    cmd[0] = (char)0xA0;
+    cmd[1] = (char)0x10;
+    printf("send_user\r\n");
+    send_user(key, MSG_TYPE_DATA,cmd, 2);
+}
+
+void send_ir_data(void)
+{
+       char cmd[2];
+    cmd[0] = (char)0xA0;
+    cmd[1] = (char)0x11;
+    printf("send_user\r\n");
+    send_user(key, MSG_TYPE_DATA,cmd, 2);
+}
+
 void send_txt_data(void)
 {
     char text[10];
@@ -92,6 +110,14 @@ ci2->fd = 102;
         {
             //send_test_data();
             send_txt_data();
+        }
+        else if(strstr(sessio,"lar"))
+        {
+           send_lar_data();
+        }
+        else if(strstr(sessio,"ir"))
+        {
+            send_ir_data();
         }
 		else if(strstr(sessio,"ls"))
 		{
