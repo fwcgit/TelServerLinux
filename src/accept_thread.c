@@ -45,7 +45,7 @@ void* accept_client(void *args)
         {
             client_len_t = sizeof(client_in);
             new_fd = accept(sockFD, (sockAddr *)&client_in, &client_len_t);
-            
+
             if(new_fd <=0 )
             {
                 printf("accept client error \n");
@@ -56,7 +56,7 @@ void* accept_client(void *args)
             
             send_data_pack(new_fd, MSG_TYPE_ID,reqCode, strlen(reqCode));
             
-            printf("connected client ip:%s new_fd:%d ret:%d \n", inet_ntoa(client_in.sin_addr),new_fd,ret);
+            printf("connected client ip:%s new_fd:%d ret:%d \r\n", inet_ntoa(client_in.sin_addr),new_fd,ret);
 		
         }
 	

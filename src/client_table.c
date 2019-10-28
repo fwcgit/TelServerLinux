@@ -14,69 +14,76 @@
 #include "j_callback.h"
 #include "map.h"
 
-pthread_rwlock_t rw_lock;
-
 root_t tree = RB_ROOT;
 fd_set read_set;
+void **table = NULL;
+void **authtable = NULL;
+int curr_count = 0;
+int curr_auth_count = 0;
 
+
+void fresh_table()
+{
+    int count = 0;
+    int auth_count = 0;
+    map_t *node;
+    for (node = map_first(&tree); node; node = map_next(&(node->node)))
+    {
+        count++;
+        client_info *ci = (client_info *)node->val;
+        printf("Node Key %s %d\r\n",ci->code,ci->fd);
+    }
+    if (count > 0)
+    {
+        if(table) free(table);
+        if(authtable) free(authtable);
+
+
+        table = (void **)malloc(sizeof(void *) * count);
+        authtable = (void **)malloc(sizeof(void *) * count);
+        int i = 0;
+       
+        for (node = map_first(&tree); node; node = map_next(&(node->node)))
+        {
+            client_info *ci = (client_info *)node->val;
+            if (ci->isAuth)
+            {
+                *(authtable + auth_count) = ci;
+                auth_count++;
+            }
+                *(table + i) = ci;
+                i++;
+            
+        }
+    }
+    else
+    {
+        if(table) free(table);
+        if(authtable) free(authtable);
+
+        table = NULL;
+        authtable = NULL;
+    }
+    
+
+    curr_auth_count = auth_count;
+    curr_count = count;
+
+
+    printf("fresh_table curr_auth_count %d curr_count %d \r\n",curr_auth_count,curr_count);
+}
 /***
  同步读取客户端列表
  **/
 void **sync_read_mapclient_list(int *size, char isAuth)
-{
-    int i = 0;
-    void *obj = NULL;
-    client_info *ci = NULL;
-    void **table = NULL;
-    int ret = -1;
-    int count = 0;
-    int auth_count = 0;
-    ret = pthread_rwlock_rdlock(&rw_lock);
-
-    if (ret == 0)
-    {
-        map_t *node;
-        for (node = map_first(&tree); node; node = map_next(&(node->node)))
-        {
-            count++;
-            ci = (client_info *)node->val;
-        }
-        if (count > 0)
-        {
-            table = (void **)malloc(sizeof(void *) * count);
-            i = 0;
-            for (node = map_first(&tree); node; node = map_next(&(node->node)))
-            {
-                ci = (client_info *)node->val;
-                if (isAuth && ci->isAuth)
-                {
-                    *(table + auth_count) = ci;
-                    auth_count++;
-                }
-                else
-                {
-                    *(table + i) = ci;
-                    i++;
-                }
-            }
-        }
-
-        pthread_rwlock_unlock(&rw_lock);
-    }
-    else
-    {
-        printf("sync_read_mapclient_list rdlock fail\n");
-        return NULL;
-    }
+{    
     if (isAuth)
     {
-        *size = auth_count;
+        *size = curr_auth_count;
+        return authtable;
     }
-    else
-    {
-        *size = count;
-    }
-
+    
+    *size = curr_count;
     return table;
 }
 
@@ -87,25 +94,27 @@ void sync_find_auth_timeout_client()
 {
 #if 1
     int index = 0;
-    int count = 0;
     int c_len = 0;
     int i = 0;
     client_info *ci;
     time_t raw_time;
     int *fds;
-    void **table = sync_read_mapclient_list(&count, 0);
-    if (count > 0)
+    if (curr_count > 0)
     {
         time(&raw_time);
-        fds = (int *)malloc(sizeof(int) * count);
-        for (i = 0; i < count; i++)
+        fds = (int *)malloc(sizeof(int) * curr_count);
+        for (i = 0; i < curr_count; i++)
         {
             ci = (client_info *)*(table + i);
-            if (raw_time - ci->ctime >= 10 && !ci->isAuth)
+            if(ci)
             {
-                *(fds + c_len) = ci->fd;
-                c_len++;
+                if (raw_time - ci->ctime >= 10 && !ci->isAuth)
+                {
+                    *(fds + c_len) = ci->fd;
+                    c_len++;
+                }
             }
+
         }
         if (c_len > 0)
         {
@@ -113,7 +122,6 @@ void sync_find_auth_timeout_client()
         }
 
         free(fds);
-        free(table);
     }
 #endif
 }
@@ -128,19 +136,14 @@ int sync_remove_list_client(int fd)
     int i;
     
     close(fd);
-    ret = pthread_rwlock_wrlock(&rw_lock);
-    if (ret == 0)
+    
+    data = get(&tree, (char *)&fd);
+    if (data)
     {
-
-        data = get(&tree, (char *)&fd);
-        if (data)
-        {
-            rb_erase(&data->node, &tree);
-            map_free(data);
-        }
+        rb_erase(&data->node, &tree);
+        map_free(data);
     }
-    pthread_rwlock_unlock(&rw_lock);
-    return 0;
+    fresh_table();
     return 0;
 }
 
@@ -153,26 +156,23 @@ int sync_free_client(int *fds, int len)
     int ret = 0;
     map_t *data;
     int i;
-    ret = pthread_rwlock_wrlock(&rw_lock);
-    if (ret == 0)
+
+    for (i = 0; i < len; i++)
     {
-        for (i = 0; i < len; i++)
+        data = get(&tree, (char *)&(*(fds + i)));
+        if (data)
         {
-            data = get(&tree, (char *)&(*(fds + i)));
-            if (data)
-            {
-                rb_erase(&data->node, &tree);
-                map_free(data);
-            }
+            rb_erase(&data->node, &tree);
+            map_free(data);
         }
     }
-    pthread_rwlock_unlock(&rw_lock);
 
      for (i = 0; i < len; i++)
     {
         close(*(fds + i));
     }
    
+    fresh_table();
     return 0;
 }
 
@@ -185,20 +185,15 @@ int sync_heartbeat_set(char *key)
 #if 1
     map_t *data;
     client_info *ci;
-    ret = pthread_rwlock_wrlock(&rw_lock);
-    if (ret == 0)
+    data = get(&tree, key);
+    if (data)
     {
-        data = get(&tree, key);
-        if (data)
+        ci = (client_info *)data->val;
+        if (ci->isAuth)
         {
-            ci = (client_info *)data->val;
-            if (ci->isAuth)
-            {
-                ci->ioTimeout++;
-            }
+            ci->ioTimeout++;
         }
     }
-    pthread_rwlock_unlock(&rw_lock);
 #endif
     return ret;
 }
@@ -212,20 +207,16 @@ int sync_heartbeat_handle(char *key)
 #if 1
     map_t *data;
     client_info *ci;
-    ret = pthread_rwlock_wrlock(&rw_lock);
-    if (ret == 0)
+
+    data = get(&tree, key);
+    if (data)
     {
-        data = get(&tree, key);
-        if (data)
+        ci = (client_info *)data->val;
+        if (ci->isAuth)
         {
-            ci = (client_info *)data->val;
-            if (ci->isAuth)
-            {
-                ci->ioTimeout = 0;
-            }
+            ci->ioTimeout = 0;
         }
     }
-    pthread_rwlock_unlock(&rw_lock);
 #endif
     return ret;
 }
@@ -243,7 +234,7 @@ int sync_get_client_count(void)
 
 void client_tbl_init(void)
 {
-    pthread_rwlock_init(&rw_lock, NULL);
+
 #if 0
     client_info *ci = (client_info *)malloc(sizeof(client_info));
     ci->fd = 100;
@@ -268,22 +259,14 @@ int accept_client_tbl(int fd)
     time_t raw_time;
     time(&raw_time);
     client_info *ci;
-    ret = pthread_rwlock_wrlock(&rw_lock);
-    if (ret == 0)
-    {
-        ci = (client_info*) malloc(sizeof(client_info));
-        memset(ci, 0, sizeof(client_info));
-        ci->fd = fd;
-        ci->ctime = raw_time;
-        put(&tree, (char *)&(ci->fd), ci);
-        printf("accept_client_tbl fd=%d raw_time %ld\r\n", ci->fd,ci->ctime);
-        pthread_rwlock_unlock(&rw_lock);
-    }
-    else
-    {
-        printf("accept client_lock_fail..\r\n");
-    }
 
+    ci = (client_info*) malloc(sizeof(client_info));
+    memset(ci, 0, sizeof(client_info));
+    ci->fd = fd;
+    ci->ctime = raw_time;
+    put(&tree, (char *)&(ci->fd), ci);
+    printf("accept_client_tbl fd=%d raw_time %ld\r\n", ci->fd,ci->ctime);
+    fresh_table();
     return 0;
 }
 
@@ -291,14 +274,11 @@ void add_fd_set()
 {
     int i = 0;
     client_info *ci = NULL;
-    void **tableClient = NULL;
-    int count = 0;
-    tableClient = sync_read_mapclient_list(&count, 0);
-    if (NULL != tableClient)
+    if (NULL != table)
     {
-        for (i = 0; i < count; i++)
+        for (i = 0; i < curr_count; i++)
         {
-            ci = (client_info *)(*(tableClient + i));
+            ci = (client_info *)(*(table + i));
             if (NULL == ci)
             {
                 printf("ci = NULL \r\n");
@@ -308,26 +288,21 @@ void add_fd_set()
                 FD_SET(ci->fd, &read_set);
             }
         }
-        free(tableClient);
-        tableClient = NULL;
     }
+
+    printf("++++++++++++++++++++++++++++++++++++++++add_fd_set \r\n ");
 }
 
 int find_max_fd()
 {
     int i = 0;
     client_info *ci = NULL;
-    void **tableClient = NULL;
     int maxfd = 0;
-    int count = 0;
-
-    tableClient = sync_read_mapclient_list(&count, 0);
-
-    if (NULL != tableClient)
+    if (NULL != table)
     {
-        for (i = 0; i < count; i++)
+        for (i = 0; i < curr_count; i++)
         {
-            ci = (client_info *)(*(tableClient + i));
+            ci = (client_info *)(*(table + i));
             if (NULL != ci)
             {
                 if (maxfd < ci->fd)
@@ -338,9 +313,6 @@ int find_max_fd()
                 printf("find_max_fd NULL \r\n");
             }
         }
-
-        free(tableClient);
-        tableClient = NULL;
     }
 
     return maxfd;
@@ -348,34 +320,32 @@ int find_max_fd()
 
 void force_client_close(client_info *ci)
 {
-    int ret;
     map_t *data;
     int fd;
-    printf("force_client_close %s %d \r\n", ci->code, ci->fd);
-    close(ci->fd);
-    ret = pthread_rwlock_wrlock(&rw_lock);
-    if (ret == 0)
+    if (NULL != ci)
     {
-        if (NULL != ci)
+        printf("force_client_close %s %d \r\n", ci->code, ci->fd);
+        fd = ci->fd;
+        if(fd > 3)
         {
-            fd = ci->fd;
-            data = get(&tree, ci->code);
-            if (data)
-            {
-                rb_erase(&(data->node), &tree);
-                map_free(data);
-                client_off_line(ci->code);
-            }
-
-            data = get(&tree, (char *)&fd);
-            if (data)
-            {
-                rb_erase(&(data->node), &tree);
-                map_free(data);
-            } 
+            close(fd);
         }
+        data = get(&tree, ci->code);
+        if (data)
+        {
+            rb_erase(&(data->node), &tree);
+            map_free(data);
+            client_off_line(ci->code);
+        }
+
+        data = get(&tree, (char *)&fd);
+        if (data)
+        {
+            rb_erase(&(data->node), &tree);
+            map_free(data);
+        } 
     }
-    pthread_rwlock_unlock(&rw_lock);
+    fresh_table();
 }
 
 void clear_exist_client(char *key)
@@ -383,24 +353,17 @@ void clear_exist_client(char *key)
     int ret;
     map_t *data;
     client_info *ci;
-    ret = pthread_rwlock_wrlock(&rw_lock);
-    if (ret == 0)
+
+    data = get(&tree, key);
+    if (data)
     {
-        data = get(&tree, key);
-        if (data)
+        ci = (client_info *)data->val;
+        if (NULL != ci)
         {
-            ci = (client_info *)data->val;
-            pthread_rwlock_unlock(&rw_lock);
-            if (NULL != ci)
-            {
-                force_client_close(ci);
-            }
-        }
-        else
-        {
-            pthread_rwlock_unlock(&rw_lock);
+            force_client_close(ci);
         }
     }
+    
 }
 void save_client(int fd, char *key)
 {
@@ -408,30 +371,42 @@ void save_client(int fd, char *key)
     client_info *newci;
     client_info *p;
     map_t *data;
-    ret = pthread_rwlock_wrlock(&rw_lock);
-    if (ret == 0)
-    {
-        printf("auth success %s %d \r\n", key, fd);
-    
-        data = get(&tree, (char *)&(fd));
-        if (data)
-        {
-            p = (client_info *)data->val;
-            newci = (client_info *)malloc(sizeof(client_info));
-            newci->fd = fd;
-            newci->isAuth = 1;
-            strcpy(newci->code, key);
-            if(p)
-            {
-                newci->ctime = p->ctime;
-            }
-            put(&tree, key, newci);
 
-            rb_erase(&(data->node), &tree);
-            map_free(data);
+    printf("auth success %s %d \r\n", key, fd);
+
+    data = get(&tree, (char *)&(fd));
+    if (data)
+    {
+        p = (client_info *)data->val;
+        newci = (client_info *)malloc(sizeof(client_info));
+        newci->fd = fd;
+        newci->isAuth = 1;
+        memset(newci->code,0,sizeof(newci->code));
+        strcpy(newci->code, key);
+        if(p)
+        {
+            newci->ctime = p->ctime;
+        }
+        put(&tree, key, newci);
+        printf("<auth success> %s %d \r\n", newci->code, newci->fd);
+        rb_erase(&(data->node), &tree);
+        map_free(data);
+
+        client_info *ti = get_client(key);
+        if(ti)
+        {
+        printf("---------------------------------<auth success> <------->{%s} %d \r\n", ti->code, ti->fd);
+
+        }
+        else
+        {
+            
+        printf("--------------------------------------<auth success> <get_client> \r\n");
+
         }
     }
-    pthread_rwlock_unlock(&rw_lock);
+
+      fresh_table();
 }
 
 client_info *client_list(int *count)
@@ -460,19 +435,25 @@ client_info *get_client(char *session)
     int ret;
     map_t *node;
     client_info *ci = NULL;
-    ret = pthread_rwlock_rdlock(&rw_lock);
-    if (ret == 0)
+    node = get(&tree, session);
+    if (NULL != node)
     {
-        node = get(&tree, session);
-        if (NULL != node)
+        ci = (client_info *)node->val;
+        if (NULL != ci)
         {
-            ci = (client_info *)node->val;
-            if (NULL != ci)
-            {
-                printf("get_client %s %d \r\n", ci->code, ci->fd);
-            }
+            printf("get_client %s %d \r\n", ci->code, ci->fd);
         }
+        else
+        {
+           printf("get_client client_info NULL");
+        }
+        
     }
-    pthread_rwlock_unlock(&rw_lock);
+    else
+    {
+        printf("get_client Node NULL");
+    }
+    
+
     return ci;
 }

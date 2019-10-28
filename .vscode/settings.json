@@ -3,6 +3,7 @@
         "client_table.h": "c",
         "client_info.h": "c",
         "server.h": "c",
-        "map.h": "c"
+        "map.h": "c",
+        "h_thread.h": "c"
     }
 }

@@ -29,32 +29,32 @@ void* handle_msg(void *args)
     package *pk         = NULL;
     ListNode *node      = NULL;
     int ret             = 0;
-    char key[16];
+    
     
     node= poll_list(list);
    
     while(is_run())
-    {
-        usleep(500 * 1000);
+    { 
+        usleep(10 * 1000);
         
         node = poll_list(list);
         if(node != NULL)
         {
             pk = (package *)node->data;
-            
+            char *key = pk->head.key;
+            //printf("handlder key %s \r\n",key);
 			switch (pk->head.type) {
 				case MSG_TYPE_ID:
-                    printf("MSG_TYPE_ID\r\n");
-                    strncpy(key, pk->data, pk->head.len);
+                    //printf("MSG_TYPE_ID\r\n");
                     clear_exist_client(key);
                     save_client(pk->fd, key);
                     client_online(key);
 					break;
 				case MSG_TYPE_CMD:
-
 					break;
+                case MSG_TYPE_DATA:
+                    break;
 				case MSG_TYPE_HEART:
-                    strncpy(key, pk->data, pk->head.len);
                     ret = sync_heartbeat_handle(key);
                    if(ret == 0)
                    {
@@ -70,7 +70,6 @@ void* handle_msg(void *args)
 
             free(pk->data);
         	free(pk);
-            memset(key,0,sizeof(key));   
         }
     }
     

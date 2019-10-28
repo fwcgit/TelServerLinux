@@ -14,13 +14,13 @@
 #define MSG_TYPE_DATA   0x03 //数据
 #define MSG_TYPE_HEART  0x04 //心跳
 #define FRAME_HEAD_SIZE 8
+#define KEY_LEN         5
 
 typedef struct m_head
 {
     char    		type;
     unsigned int 	len;
-    unsigned int    ck;
-    int             crc;
+    char            key[6];
 }msg_head;
 
 typedef struct m_package

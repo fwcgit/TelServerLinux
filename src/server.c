@@ -32,7 +32,7 @@ void init_config(int port)
 
 void init(void)
 {
-	LISTENER_PORT = 28866;
+	LISTENER_PORT = 38888;
 }
 
 void printOldData(char *data,ssize_t len)
@@ -42,8 +42,10 @@ void printOldData(char *data,ssize_t len)
     if(NULL != data && len > 0){
         for(i = 0; i < len; i++)
         {
-                printf("%02X",*(data+i));
+                printf("%02X--",*(data+i));
         }
+
+        printf("\r\n");
     }
  #endif
 }
@@ -58,12 +60,15 @@ ssize_t send_data_pack(int fd,char type,char *data,size_t len)
         *(user_data+3) = (char)(data_len >> 8);
         *(user_data+4) = (char)(data_len >> 0);
         *(user_data+5) = type;
+
         uint16_t crc_code = CRC16((unsigned char *)user_data,6);
         *(user_data+6) = (char)(crc_code>>8);
         *(user_data+7) = (char)(crc_code>>0);
+
         uint16_t crc_data = CRC16((unsigned char *)data,len);
         *(user_data+(data_len-2)) = (char)(crc_data>>8);
         *(user_data+(data_len-1)) = (char)(crc_data>>0);
+
         memcpy(user_data+FRAME_HEAD_SIZE,data,len);
         printOldData(user_data,data_len);
         ssize_t s_len = send_data(fd,type,user_data,data_len);
@@ -114,14 +119,13 @@ ssize_t send_user(char *session,char type,char *data,size_t len)
     ssize_t ret = 0;
     if(NULL != ci)
     {
-        printf("send user client \n");
         printf("send user client %s \n",ci->code);
         ret = send_data_pack(ci->fd,type, data, len);
     }
     else
     {
         ret = -1;
-        printf("send user no client \n");
+        printf("send user no client %s\n",session);
     }
     
     return ret;

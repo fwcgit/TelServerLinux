@@ -47,4 +47,6 @@ int sync_heartbeat_set(char *key);
 
 int sync_free_client(int *fds,int len);
 
+int *get_fd_list(int *count);
+
 #endif /* cleint_table_h */

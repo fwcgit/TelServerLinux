@@ -19,7 +19,7 @@
 #include <limits.h>
 
 unsigned int client_count = 0;
-char *key = "Print0001";
+char *key = "00001";
 
 
 void my_printf(const char *format,...)
@@ -120,6 +120,7 @@ ci2->fd = 102;
             send_ir_data();
         }
 		else if(strstr(sessio,"ls"))
+        
 		{
 			printf("get_client_list\n");
             count = 0;

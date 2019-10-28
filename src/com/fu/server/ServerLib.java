@@ -35,6 +35,10 @@ public class ServerLib{
 	{
 		System.out.println("jni_closeClinetConnect"+session);
 	}
+
+	public void receUserData(byte[] data){
+		
+	}
 	
 	public  void LOG(int type,String txt)
 	{

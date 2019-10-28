@@ -52,7 +52,6 @@ JNIEXPORT jlong JNICALL Java_com_fu_server_ServerLib_sendCmd
     char *data = (char *)malloc(sizeof(char));
     memcpy(data, (char*)&cmd, 1);
     ret = send_user(user_s,MSG_TYPE_CMD,data,1);
-    
     free(data);
     free(user_s);
     
