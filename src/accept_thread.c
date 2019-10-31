@@ -9,7 +9,6 @@
 #include "h_thread.h"
 #include "log.h"
 #include "client_table.h"
-
 void* accept_client(void *args)
 {
     char *reqCode = "reqCode";
@@ -21,7 +20,8 @@ void* accept_client(void *args)
     int ret = 1;
     tv.tv_sec = 0;
     tv.tv_usec = 500;
-    
+    int sock_timeout = 1000;
+    char _LINGER = 0;
     while (is_run())
     {
         FD_ZERO(&rec_fd_set);
@@ -51,7 +51,10 @@ void* accept_client(void *args)
                 printf("accept client error \n");
                 continue;
             }
- 
+            setsockopt(new_fd,SOL_SOCKET,SO_RCVBUF,(char *)&sock_timeout,sizeof(int));
+            //setsockopt(new_fd,SOL_SOCKET,SO_SNDBUF,(char *)&sock_timeout,sizeof(int));
+
+            //setsockopt(new_fd,SOL_SOCKET,SO_LINGER,(char *)&_LINGER,sizeof(char));
             accept_client_tbl(new_fd);
             
             send_data_pack(new_fd, MSG_TYPE_ID,reqCode, strlen(reqCode));

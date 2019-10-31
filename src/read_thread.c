@@ -69,9 +69,6 @@ void* read_client(void *args)
                     if(FD_ISSET(info->fd,&read_set))
                     {
                         memset(&buff, 0, sizeof(buff));
-                        int set_ret = setsockopt(info->fd,SOL_SOCKET,SO_RCVBUF,(char *)&recv_timout,sizeof(int));
-                        if(set_ret != 0) continue;
-                        
                         rec = recv(info->fd, buff, FRAME_HEAD_SIZE, 0); 
                         if(rec > 0)
                         {
