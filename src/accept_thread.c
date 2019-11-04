@@ -51,10 +51,9 @@ void* accept_client(void *args)
                 printf("accept client error \n");
                 continue;
             }
-            setsockopt(new_fd,SOL_SOCKET,SO_RCVBUF,(char *)&sock_timeout,sizeof(int));
-            //setsockopt(new_fd,SOL_SOCKET,SO_SNDBUF,(char *)&sock_timeout,sizeof(int));
+            int flags = fcntl(new_fd, F_GETFL, 0);         //获取文件的flags值。
+            fcntl(new_fd, F_SETFL, flags | O_NONBLOCK);   //设置成非阻塞模式；
 
-            //setsockopt(new_fd,SOL_SOCKET,SO_LINGER,(char *)&_LINGER,sizeof(char));
             accept_client_tbl(new_fd);
             
             send_data_pack(new_fd, MSG_TYPE_ID,reqCode, strlen(reqCode));
