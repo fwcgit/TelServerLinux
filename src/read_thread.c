@@ -154,12 +154,12 @@ void* read_client(void *args)
                                                 printf("recv %s Len:%ld\n",data,data_len);
                                             }
 
-                                        }
-
-                                        
+                                        }   
                                     }
                                 }
                             }
+
+                            printf("read data  %s \r\n",buff);
                         }
                         else if(rec <= 0)
                         {
