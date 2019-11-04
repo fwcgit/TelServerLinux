@@ -49,11 +49,11 @@ void* read_client(void *args)
         if(ret < 0 )
         {
             sleep(1);
-            //printf("select read fail ! \n");
+            printf("select read fail ! \n");
         }
         else if(ret == 0)
         {
-           //printf("select read time out! \n");
+           printf("select read time out! \n");
         }
         else
         {
@@ -171,6 +171,11 @@ void* read_client(void *args)
                 }
             
             }
+            else
+            {
+                printf("read NULL\r\n");
+            }
+            
   
         }
     }
