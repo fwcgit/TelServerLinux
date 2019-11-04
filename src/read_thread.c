@@ -69,7 +69,7 @@ void* read_client(void *args)
                     if(FD_ISSET(info->fd,&read_set))
                     {
                         memset(&buff, 0, sizeof(buff));
-                        rec = recv(info->fd, buff, FRAME_HEAD_SIZE, 0,MSG_DONTWAIT); 
+                        rec = recv(info->fd, buff, FRAME_HEAD_SIZE, MSG_DONTWAIT); 
                         if(rec > 0)
                         {
                             totalBytes += rec;
@@ -109,7 +109,7 @@ void* read_client(void *args)
 
                                         while(totalBytes < data_len)
                                         {
-                                             rec = recv(info->fd, buff+totalBytes, data_len, 0,MSG_DONTWAIT);
+                                             rec = recv(info->fd, buff+totalBytes, data_len, MSG_DONTWAIT);
                                             if(rec <= 0)
                                             {
                                                 printf("read data fail 1 %ld \r\n",rec);
