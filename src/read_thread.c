@@ -72,7 +72,7 @@ void* read_client(void *args)
                         rec = recv(info->fd, buff, FRAME_HEAD_SIZE, MSG_DONTWAIT);
                         while(rec == 0 && retimout++ < 10)
                         {
-                            usleep(100 * 1000);
+                            usleep(10 * 1000);
                             rec = recv(info->fd, buff, FRAME_HEAD_SIZE, MSG_DONTWAIT);
                         }
                         if(rec > 0)
@@ -84,7 +84,7 @@ void* read_client(void *args)
                                 retimout = 0;    
                                 while(rec == 0 && retimout++ < 10)
                                 {
-                                    usleep(100 * 1000);
+                                    usleep(10 * 1000);
                                     rec = recv(info->fd, buff+totalBytes, 1, MSG_DONTWAIT);
                                 }
 
@@ -125,7 +125,7 @@ void* read_client(void *args)
                                             retimout = 0;    
                                             while(rec == 0 && retimout++ < 10)
                                             {
-                                                usleep(100 * 1000);
+                                                usleep(10 * 1000);
                                                 rec = recv(info->fd, buff+totalBytes, data_len, MSG_DONTWAIT);
                                             }
                                             if(rec <= 0)
