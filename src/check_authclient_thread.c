@@ -18,7 +18,7 @@ void* run_auth_client(void *args)
 {
     while(is_run())
     {
-        sleep(3);
+        sleep(10);
         sync_find_auth_timeout_client();    
         fflush(stdout);
         
