@@ -7,6 +7,7 @@
 //
 
 #include "list.h"
+#include "log.h"
 
 void insert_list(List *list,void *data,int index)
 {
@@ -89,7 +90,7 @@ void add_list_index(List *list,void *data,int index)
 {
     if(list->count >= list->size)
     {
-        printf("list full ! \r");
+        log_flush("list full ! \r");
         return;
     }
     

@@ -7,6 +7,7 @@
 //
 
 #include "socket.h"
+#include "log.h"
 
 int socket_fd = 0;
 int sockFD;
@@ -21,7 +22,7 @@ int listener_socket()
     
     if(socket_fd == -1)
     {
-        printf("create socket fail! \r");
+        log_flush("create socket fail! \r");
         return socket_fd;
     }
     
@@ -34,13 +35,13 @@ int listener_socket()
     
     if(err == -1)
     {
-        perror("bind socket fail!");
+        log_flush("bind socket fail!");
         return err;
     }
     
     err = listen(socket_fd,BACK_COUNT);
     if (err == -1) {
-        printf("listener socket fail! error = %d \r",errno);
+        log_flush("listener socket fail! error = %d \r",errno);
         exit(1);
     }
     sockFD = socket_fd;

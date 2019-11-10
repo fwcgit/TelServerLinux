@@ -98,7 +98,7 @@ void client_online(char *session)
     int ret;
     JNIEnv *env;
     
-    printf("client_online {%s} \r\n",session);
+    log_flush("client_online {%s} \r\n",session);
 #if 1
     if(NULL != gVM)
     {

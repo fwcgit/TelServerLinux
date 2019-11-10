@@ -14,6 +14,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "client_table.h"
+#include "log.h"
 void* run_auth_client(void *args)
 {
     while(is_run())
@@ -35,11 +36,11 @@ void start_auth_thread(void)
 
 	if(ret == 0)
 	{
-		printf("start_auth_thread success\n");
+		log_flush("start_auth_thread success\n");
 	}
 	else
 	{
-		perror("start_auth_thread fail\n");
+		log_flush("start_auth_thread fail\n");
 	}
 
 }

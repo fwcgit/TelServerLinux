@@ -48,7 +48,7 @@ void* accept_client(void *args)
 
             if(new_fd <=0 )
             {
-                printf("accept client error \n");
+                log_flush("accept client error \n");
                 continue;
             }
             int flags = fcntl(new_fd, F_GETFL, 0);         //获取文件的flags值。
@@ -58,7 +58,7 @@ void* accept_client(void *args)
             
             send_data_pack(new_fd, MSG_TYPE_ID,reqCode, strlen(reqCode));
             
-            printf("connected client ip:%s new_fd:%d ret:%d \r\n", inet_ntoa(client_in.sin_addr),new_fd,ret);
+            log_flush("connected client ip:%s new_fd:%d ret:%d \r\n", inet_ntoa(client_in.sin_addr),new_fd,ret);
 		
         }
 	
@@ -74,10 +74,10 @@ void start_accept_thread(void)
 	ret = pthread_create(&pid,NULL,accept_client,NULL);
 	if(ret == 0)
 	{
-		printf("start_accept_thread success\n");
+		log_flush("start_accept_thread success\n");
 	}
 	else
 	{
-		perror("start_accept_thread fail\n");
+		log_flush("start_accept_thread fail\n");
 	}
 }

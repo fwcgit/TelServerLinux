@@ -10,6 +10,7 @@
 #include "server.h"
 #include "h_thread.h"
 #include "client_table.h"
+#include "log.h"
 
 void* run_heartbeat_client(void *args)
 {
@@ -31,7 +32,7 @@ void* run_heartbeat_client(void *args)
                 {
                     if(ci->ioTimeout >= 3)
                     {
-                        printf("no heartbeat close client fd:%d code:%s \n",ci->fd,ci->code);
+                        log_flush("no heartbeat close client fd:%d code:%s \n",ci->fd,ci->code);
                         force_client_close(ci);
                     }
                     else

@@ -9,6 +9,7 @@
 #include "h_thread.h"
 #include "client_table.h"
 #include "crc.h"
+#include "log.h"
 
 #define READ_WAIT_TIME  20 * 1000
 
@@ -42,19 +43,19 @@ void* read_client(void *args)
 	    add_fd_set();
         maxfd = find_max_fd();
         maxfd = sockFD > maxfd ? sockFD : maxfd;
-        tv.tv_sec = 3;
-        tv.tv_usec = 0;
+        tv.tv_sec = 0;
+        tv.tv_usec = 500;
         
         ret = select(maxfd+1,&read_set,NULL,NULL,&tv);
         
         if(ret < 0 )
         {
             sleep(1);
-            printf("select read fail ! \n");
+            log_flush("select read fail ! \n");
         }
         else if(ret == 0)
         {
-           printf("select read time out! \n");
+           log_flush("select read time out! \n");
         }
         else
         {
@@ -91,7 +92,7 @@ void* read_client(void *args)
 
                                 if(rec <= 0)
                                 {
-                                    printf("read data fail 1 %ld \r\n",rec);
+                                    log_flush("read data fail 1 %ld \r\n",rec);
                                     force_client_close(info);
                                     break;
                                 } 
@@ -131,7 +132,7 @@ void* read_client(void *args)
                                             }
                                             if(rec <= 0)
                                             {
-                                                printf("read data fail 1 %ld \r\n",rec);
+                                                log_flush("read data fail 1 %ld \r\n",rec);
                                                 force_client_close(info);
                                                 break;
                                             } 
@@ -167,10 +168,10 @@ void* read_client(void *args)
                                                     
                                                     for(i = 0; i < user_data_len; i++)
                                                     {
-                                                            printf("%02X--",*(data+i));
+                                                            log_flush("%02X--",*(data+i));
                                                     }
-                                                    printf("--------------------\r\n");
-                                                printf("recv %s Len:%ld\n",data,data_len);
+                                                    log_flush("--------------------\r\n");
+                                                log_flush("recv %s Len:%ld\n",data,data_len);
                                             }
 
                                         }   
@@ -178,11 +179,11 @@ void* read_client(void *args)
                                 }
                             }
 
-                            printf("read data  %s \r\n",buff);
+                            log_flush("read data  %s \r\n",buff);
                         }
                         else if(rec <= 0)
                         {
-                            printf("read data fail 2  %ld \r\n",rec);
+                            log_flush("read data fail 2  %ld \r\n",rec);
                             force_client_close(info);
                             
                         }
@@ -192,7 +193,7 @@ void* read_client(void *args)
             }
             else
             {
-                printf("read NULL\r\n");
+                log_flush("read NULL\r\n");
             }
             
   
@@ -210,10 +211,10 @@ void start_read_thread(void)
 
 	if(ret == 0)
 	{
-		printf("start_read_thread success\n");
+		log_flush("start_read_thread success\n");
 	}
 	else
 	{
-		perror("start_read_thread fail \n");
+		log_flush("start_read_thread fail \n");
 	}
 }

@@ -12,6 +12,7 @@
 #include "client_table.h"
 #include <time.h>
 #include "j_callback.h"
+#include "log.h"
 
 void get_time_str(char *buff)
 {
@@ -61,7 +62,7 @@ void* handle_msg(void *args)
                        sync_heartbeat_handle(key);
                    }
                     
-                    printf("recv heartbeat %s \n",key);
+                    log_flush("recv heartbeat %s \n",key);
 					break;
 			}
 			
@@ -85,11 +86,11 @@ void start_handle_thread(void)
 
 	if(ret == 0)
 	{
-		printf("start_handle_thread success\n");
+		log_flush("start_handle_thread success\n");
 	}
 	else
 	{
-		perror("start_handle_thread fail\n");
+		log_flush("start_handle_thread fail\n");
 	}
 }
 
