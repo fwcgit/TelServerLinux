@@ -292,7 +292,7 @@ void add_fd_set()
         }
     }
 
-    printf("++++++++++++++++++++++++++++++++++++++++add_fd_set raw_time %ld \r\n ",raw_time);
+   // printf("++++++++++++++++++++++++++++++++++++++++add_fd_set raw_time %ld \r\n ",raw_time);
 }
 
 int find_max_fd()
