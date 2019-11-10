@@ -42,7 +42,7 @@ void* read_client(void *args)
 	    add_fd_set();
         maxfd = find_max_fd();
         maxfd = sockFD > maxfd ? sockFD : maxfd;
-        tv.tv_sec = 1;
+        tv.tv_sec = 3;
         tv.tv_usec = 0;
         
         ret = select(maxfd+1,&read_set,NULL,NULL,&tv);
