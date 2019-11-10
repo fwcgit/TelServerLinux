@@ -10,6 +10,7 @@
 #include "client_table.h"
 #include "crc.h"
 
+#define READ_WAIT_TIME = 20 * 1000
 
 void* read_client(void *args)
 {
@@ -72,7 +73,7 @@ void* read_client(void *args)
                         rec = recv(info->fd, buff, FRAME_HEAD_SIZE, MSG_DONTWAIT);
                         while(rec == 0 && retimout++ < 10)
                         {
-                            usleep(10 * 1000);
+                            usleep(READ_WAIT_TIME);
                             rec = recv(info->fd, buff, FRAME_HEAD_SIZE, MSG_DONTWAIT);
                         }
                         if(rec > 0)
@@ -84,7 +85,7 @@ void* read_client(void *args)
                                 retimout = 0;    
                                 while(rec == 0 && retimout++ < 10)
                                 {
-                                    usleep(10 * 1000);
+                                    usleep(READ_WAIT_TIME;
                                     rec = recv(info->fd, buff+totalBytes, 1, MSG_DONTWAIT);
                                 }
 
@@ -125,7 +126,7 @@ void* read_client(void *args)
                                             retimout = 0;    
                                             while(rec == 0 && retimout++ < 10)
                                             {
-                                                usleep(10 * 1000);
+                                                usleep(READ_WAIT_TIME);
                                                 rec = recv(info->fd, buff+totalBytes, data_len, MSG_DONTWAIT);
                                             }
                                             if(rec <= 0)

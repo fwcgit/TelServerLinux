@@ -273,6 +273,8 @@ int accept_client_tbl(int fd)
 void add_fd_set()
 {
     int i = 0;
+    time_t raw_time;
+    time(&raw_time);
     client_info *ci = NULL;
     if (NULL != table)
     {
@@ -290,7 +292,7 @@ void add_fd_set()
         }
     }
 
-    printf("++++++++++++++++++++++++++++++++++++++++add_fd_set \r\n ");
+    printf("++++++++++++++++++++++++++++++++++++++++add_fd_set raw_time %ld \r\n ",raw_time);
 }
 
 int find_max_fd()
