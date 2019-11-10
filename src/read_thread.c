@@ -10,7 +10,7 @@
 #include "client_table.h"
 #include "crc.h"
 
-#define READ_WAIT_TIME = 20 * 1000
+#define READ_WAIT_TIME  20 * 1000
 
 void* read_client(void *args)
 {
