@@ -85,7 +85,7 @@ void* read_client(void *args)
                                 retimout = 0;    
                                 while(rec == 0 && retimout++ < 10)
                                 {
-                                    usleep(READ_WAIT_TIME;
+                                    usleep(READ_WAIT_TIME);
                                     rec = recv(info->fd, buff+totalBytes, 1, MSG_DONTWAIT);
                                 }
 
