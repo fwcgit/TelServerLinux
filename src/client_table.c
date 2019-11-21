@@ -192,7 +192,6 @@ int sync_heartbeat_set(char *key)
         ci = (client_info *)data->val;
         if (ci->isAuth)
         {
-            send_data_pack(ci->fd,MSG_TYPE_HEART,"",0);
             ci->ioTimeout++;
         }
     }
@@ -217,6 +216,7 @@ int sync_heartbeat_handle(char *key)
         
         if (ci->isAuth)
         {
+             send_data_pack(ci->fd,MSG_TYPE_HEART,"",0);
             ci->ioTimeout = 0;
         }
     }
