@@ -13,6 +13,7 @@
 #include <time.h>
 #include "j_callback.h"
 #include "map.h"
+#include "server.h"
 
 root_t tree = RB_ROOT;
 fd_set read_set;
@@ -191,6 +192,7 @@ int sync_heartbeat_set(char *key)
         ci = (client_info *)data->val;
         if (ci->isAuth)
         {
+            send_data_pack(ci->fd,MSG_TYPE_HEART,"",0);
             ci->ioTimeout++;
         }
     }
@@ -212,6 +214,7 @@ int sync_heartbeat_handle(char *key)
     if (data)
     {
         ci = (client_info *)data->val;
+        
         if (ci->isAuth)
         {
             ci->ioTimeout = 0;

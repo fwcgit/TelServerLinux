@@ -42,10 +42,10 @@ void printOldData(char *data,ssize_t len)
     if(NULL != data && len > 0){
         for(i = 0; i < len; i++)
         {
-                printf("%02X--",*(data+i));
+                log_flush("%02X--",*(data+i));
         }
 
-        printf("\r\n");
+        log_flush("\r\n");
     }
  #endif
 }
@@ -103,7 +103,7 @@ ssize_t send_data(int fd,char type,char *data,size_t len)
         
         if(s_len == 0)
         {
-            printf("send data fail %d\n",fd);
+            log_flush("send data fail %d\n",fd);
             return 0;
         }
         
@@ -119,13 +119,13 @@ ssize_t send_user(char *session,char type,char *data,size_t len)
     ssize_t ret = 0;
     if(NULL != ci)
     {
-        printf("send user client %s \n",ci->code);
+        log_flush("send user client %s \n",ci->code);
         ret = send_data_pack(ci->fd,type, data, len);
     }
     else
     {
         ret = -1;
-        printf("send user no client %s\n",session);
+        log_flush("send user no client %s\n",session);
     }
     
     return ret;

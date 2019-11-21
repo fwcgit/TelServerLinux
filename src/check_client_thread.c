@@ -55,10 +55,10 @@ void start_heart_thread(void)
 
     if(ret == 0)
     {
-        printf("start_heart_thread success\n");
+        log_flush("start_heart_thread success\n");
     }
     else
     {
-        perror("start_heart_thread fail\n");
+        log_flush("start_heart_thread fail\n");
     }
 }

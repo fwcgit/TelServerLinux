@@ -44,7 +44,7 @@ void send_test_data(void)
 {
     char text[4096 * 10];
     memset(text, 'C', 4096 * 10);
-    printf("send_user\r\n");
+    log_flush("send_user\r\n");
     send_user(key, MSG_TYPE_DATA,text, 4096 * 10);
 }
 
@@ -53,7 +53,7 @@ void send_lar_data(void)
     char cmd[2];
     cmd[0] = (char)0xA0;
     cmd[1] = (char)0x10;
-    printf("send_user\r\n");
+    log_flush("send_user\r\n");
     send_user(key, MSG_TYPE_DATA,cmd, 2);
 }
 
@@ -62,7 +62,7 @@ void send_ir_data(void)
        char cmd[2];
     cmd[0] = (char)0xA0;
     cmd[1] = (char)0x11;
-    printf("send_user\r\n");
+    log_flush("send_user\r\n");
     send_user(key, MSG_TYPE_DATA,cmd, 2);
 }
 
@@ -70,7 +70,7 @@ void send_txt_data(void)
 {
     char text[10];
     memset(text, 'A',10);
-    printf("send_user\r\n");
+    log_flush("send_user\r\n");
     send_user(key, MSG_TYPE_DATA,text, 10);
 }
 
