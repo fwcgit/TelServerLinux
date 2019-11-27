@@ -13,6 +13,7 @@
 #include <time.h>
 #include "j_callback.h"
 #include "log.h"
+#include "server.h"
 
 void get_time_str(char *buff)
 {
@@ -49,6 +50,7 @@ void* handle_msg(void *args)
                     //printf("MSG_TYPE_ID\r\n");
                     clear_exist_client(key);
                     save_client(pk->fd, key);
+                    send_user("M0001",MSG_TYPE_CMD,"change");
                     client_online(key);
 					break;
 				case MSG_TYPE_CMD:

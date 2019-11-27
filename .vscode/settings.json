@@ -1,9 +1,8 @@
 {
     "files.associations": {
-        "client_table.h": "c",
+        "h_thread.h": "c",
+        "socket.h": "c",
         "client_info.h": "c",
-        "server.h": "c",
-        "map.h": "c",
-        "h_thread.h": "c"
+        "server.h": "c"
     }
 }
