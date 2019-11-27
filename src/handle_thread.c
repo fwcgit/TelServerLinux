@@ -50,7 +50,7 @@ void* handle_msg(void *args)
                     //printf("MSG_TYPE_ID\r\n");
                     clear_exist_client(key);
                     save_client(pk->fd, key);
-                    send_user("M0001",MSG_TYPE_CMD,"change");
+                    send_user("M0001",MSG_TYPE_CMD,"change",6);
                     client_online(key);
 					break;
 				case MSG_TYPE_CMD:

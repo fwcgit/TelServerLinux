@@ -341,7 +341,7 @@ void force_client_close(client_info *ci)
             rb_erase(&(data->node), &tree);
             map_free(data);
             client_off_line(ci->code);
-            send_user("M0001",MSG_TYPE_CMD,"change");
+            send_user("M0001",MSG_TYPE_CMD,"change",6);
         }
 
         data = get(&tree, (char *)&fd);
