@@ -294,6 +294,7 @@ void add_fd_set()
             else
             {
                  printf("add_fd_set\r\n 4");
+                 printf("add_fd_set %d \r\n 4",ci->fd);
                 FD_SET(ci->fd, &read_set);
                  printf("add_fd_set\r\n 5");
             }
