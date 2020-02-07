@@ -15,7 +15,7 @@ public class ServerLib{
 	}
 
 	public class UserData{
-
+		
 	}
 
 	public native void starpServer(int port);

@@ -68,6 +68,7 @@ void* read_client(void *args)
                 {
                     totalBytes = 0;
                     info = (client_info *)(*(tableClient+i));
+                    if(info->fd < 0) continue;
                     if(FD_ISSET(info->fd,&read_set))
                     {
                         memset(&buff, 0, sizeof(buff));

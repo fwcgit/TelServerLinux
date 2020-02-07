@@ -318,10 +318,14 @@ int find_max_fd()
         for (i = 0; i < curr_count; i++)
         {
             ci = (client_info *)(*(table + i));
-            if (NULL != ci)
+            if (NULL != ci )
             {
-                if (maxfd < ci->fd)
-                    maxfd = ci->fd;
+                if(ci->fd > 0)
+                {
+                     if (maxfd < ci->fd)
+                        maxfd = ci->fd;
+                }
+               
             }
             else
             {
