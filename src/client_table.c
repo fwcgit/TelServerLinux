@@ -67,8 +67,8 @@ void fresh_table()
     }
     
 
-    curr_auth_count = auth_count-1;
-    curr_count = count-1;
+    curr_auth_count = auth_count;
+    curr_count = count;
 
 
     printf("fresh_table curr_auth_count %d curr_count %d \r\n",curr_auth_count,curr_count);
