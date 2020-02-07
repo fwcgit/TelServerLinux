@@ -14,6 +14,10 @@ public class ServerLib{
 		System.load(file.getAbsolutePath());
 	}
 
+	public class UserData{
+
+	}
+
 	public native void starpServer(int port);
 
 	public native void closeServer();

@@ -4,5 +4,6 @@
         "socket.h": "c",
         "client_info.h": "c",
         "server.h": "c"
-    }
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
 }

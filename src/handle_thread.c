@@ -57,6 +57,8 @@ void* handle_msg(void *args)
 					break;
                 case MSG_TYPE_DATA:
                     break;
+                case MSG_TYPE_TRANSPOND:
+                    break;
 				case MSG_TYPE_HEART:
                 sync_heartbeat_handle(key);                    
                 log_flush("recv heartbeat %s \n",key);

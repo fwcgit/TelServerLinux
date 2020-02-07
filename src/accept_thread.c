@@ -20,8 +20,6 @@ void* accept_client(void *args)
     int ret = 1;
     tv.tv_sec = 0;
     tv.tv_usec = 500;
-    int sock_timeout = 1000;
-    char _LINGER = 0;
     while (is_run())
     {
         FD_ZERO(&rec_fd_set);
