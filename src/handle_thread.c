@@ -69,7 +69,6 @@ void* handle_msg(void *args)
 		//		   pk->fd,pk->head.type,pk->head.len,pk->body);
 
             free(pk->data);
-            pk->data = NULL;
         	free(pk);
             pk = NULL;
         }
