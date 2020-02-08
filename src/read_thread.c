@@ -70,6 +70,7 @@ void* read_client(void *args)
                     info = (client_info *)(*(tableClient+i));
                     if(info == NULL) continue; 
                     if(info->fd < 0) continue;
+                    log_flush("info fd ------------------%d-------------------",info->fd);
                     if(FD_ISSET(info->fd,&read_set))
                     {
                         memset(&buff, 0, sizeof(buff));
