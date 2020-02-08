@@ -193,8 +193,6 @@ void* read_client(void *args)
                         }
                     }
                 }
-                free(tableClient);
-                tableClient = NULL;
             }
             else
             {

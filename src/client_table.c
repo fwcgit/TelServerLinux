@@ -89,16 +89,11 @@ void **sync_read_mapclient_list(int *size, char isAuth)
 {    
     if (isAuth)
     {
-         void **at = (void **)malloc(sizeof(void *) * curr_auth_count);
-         memcpy(at,authtable,sizeof(void *) * curr_auth_count);
         *size = curr_auth_count;
-        return at;
+        return authtable;
     }
-    
-    void **tt = (void **)malloc(sizeof(void *) * curr_count);
-    memcpy(tt,table,sizeof(void *) * curr_count);
     *size = curr_count;
-    return tt;
+    return table;
 }
 
 /***
@@ -474,9 +469,6 @@ client_info *client_list(int *count)
         {
             *(list + i) = *(*(table + i));
         }
-
-        free(table);
-        table = NULL;
     }
 
     return list;

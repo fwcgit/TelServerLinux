@@ -41,9 +41,6 @@ void* run_heartbeat_client(void *args)
                     }
                 }
             }
-
-            free(tableClient);
-            tableClient = NULL;
         }
     }
     return (void *)NULL;
