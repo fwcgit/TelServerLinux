@@ -70,6 +70,7 @@ void* read_client(void *args)
                     totalBytes = 0;
                     client_info *info = (client_info *)(*(tableClient+i));
                     if(info == NULL) continue; 
+                    if(sizeof(*info) != sizeof(client_info))continue;
                     if(info->fd < 0 || info->fd >= 1024) continue;
                     if(FD_ISSET(info->fd,&read_set))
                     {
