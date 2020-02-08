@@ -306,7 +306,7 @@ void add_fd_set()
             {
                  //printf("add_fd_set\r\n 4");
                 //printf("add_fd_set %d \r\n 4",ci->fd);
-                 if(ci->fd > 0)
+                 if(ci->fd > 0 && ci->fd < 1024)
                  {
                       FD_SET(ci->fd, &read_set);
                  }
