@@ -292,26 +292,26 @@ void add_fd_set()
      if(is_wirte) return ;
     if (NULL != table)
     {
-        printf("add_fd_set\r\n 1");
+        //printf("add_fd_set\r\n 1");
         for (i = 0; i < curr_count; i++)
         {
-             printf("add_fd_set\r\n 2");
+             //printf("add_fd_set\r\n 2");
             ci = (client_info *)(*(table + i));
-             printf("add_fd_set\r\n 3");
+             //printf("add_fd_set\r\n 3");
             if (NULL == ci)
             {
                 printf("ci = NULL \r\n");
             }
             else
             {
-                 printf("add_fd_set\r\n 4");
-                printf("add_fd_set %d \r\n 4",ci->fd);
+                 //printf("add_fd_set\r\n 4");
+                //printf("add_fd_set %d \r\n 4",ci->fd);
                  if(ci->fd > 0)
                  {
                       FD_SET(ci->fd, &read_set);
                  }
                
-                 printf("add_fd_set\r\n 5");
+                 //printf("add_fd_set\r\n 5");
             }
         }
     }
