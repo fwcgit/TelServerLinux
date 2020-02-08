@@ -332,7 +332,7 @@ void add_fd_set()
                 }
                 else
                 {
-                    if(sizeof(*info) != sizeof(client_info))continue;
+                    if(sizeof(*ci) != sizeof(client_info))continue;
                     if(ci->fd > 0 && ci->fd < 1024)
                     {
                         FD_SET(ci->fd, &read_set);
@@ -362,7 +362,7 @@ int find_max_fd()
             {
                 ci = (client_info *)(*(table + i));
 
-                if(info == NULL) continue; 
+                if(ci == NULL) continue; 
 
                 if(sizeof(*info) != sizeof(client_info))continue;
 
