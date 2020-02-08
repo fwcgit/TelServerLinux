@@ -93,6 +93,7 @@ void fresh_table()
 void **sync_read_mapclient_list(int *size, char isAuth)
 {   
    
+   fresh_table();
     if (isAuth)
     {
         *size = curr_auth_count;
@@ -331,6 +332,7 @@ void add_fd_set()
                 }
                 else
                 {
+                    if(sizeof(*info) != sizeof(client_info))continue;
                     if(ci->fd > 0 && ci->fd < 1024)
                     {
                         FD_SET(ci->fd, &read_set);
@@ -359,7 +361,7 @@ int find_max_fd()
             for (i = 0; i < curr_count; i++)
             {
                 ci = (client_info *)(*(table + i));
-                
+
                 if(info == NULL) continue; 
 
                 if(sizeof(*info) != sizeof(client_info))continue;
