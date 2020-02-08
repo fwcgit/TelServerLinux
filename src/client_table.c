@@ -57,7 +57,7 @@ void fresh_table()
             {
                 client_info *ci = (client_info *)node->val;
                 client_info info;
-                memcpy(info,*ci,sizeof(client_info));
+                memcpy(&info,*ci,sizeof(client_info));
                 if (ci->isAuth)
                 {
                     *(authtable + auth_count) = &info;
