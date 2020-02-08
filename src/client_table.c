@@ -359,6 +359,11 @@ int find_max_fd()
             for (i = 0; i < curr_count; i++)
             {
                 ci = (client_info *)(*(table + i));
+                
+                if(info == NULL) continue; 
+
+                if(sizeof(*info) != sizeof(client_info))continue;
+
                 if (NULL != ci && ci->fd < 1024 && ci->fd >0)
                 {
                     if(ci->fd > 0)
