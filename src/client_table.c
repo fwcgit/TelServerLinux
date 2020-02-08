@@ -21,7 +21,7 @@ void **table = NULL;
 void **authtable = NULL;
 int curr_count = 0;
 int curr_auth_count = 0;
-
+unsigned char is_wirte = 0;
 
 void fresh_table()
 {
@@ -100,6 +100,9 @@ void sync_find_auth_timeout_client()
     client_info *ci;
     time_t raw_time;
     int *fds;
+
+    if(is_wirte) return;
+
     if (curr_count > 0)
     {
         time(&raw_time);
@@ -132,10 +135,11 @@ void sync_find_auth_timeout_client()
  **/
 int sync_remove_list_client(int fd)
 {
+    
     int ret = 0;
     map_t *data;
     int i;
-    
+    is_wirte = 1;
     close(fd);
     
     data = get(&tree, (char *)&fd);
@@ -145,6 +149,7 @@ int sync_remove_list_client(int fd)
         map_free(data);
     }
     fresh_table();
+    is_wirte = 0;
     return 0;
 }
 
@@ -157,7 +162,7 @@ int sync_free_client(int *fds, int len)
     int ret = 0;
     map_t *data;
     int i;
-
+    is_wirte = 1;
     for (i = 0; i < len; i++)
     {
         data = get(&tree, (char *)&(*(fds + i)));
@@ -174,6 +179,7 @@ int sync_free_client(int *fds, int len)
     }
    
     fresh_table();
+    is_wirte = 0;
     return 0;
 }
 
@@ -183,6 +189,7 @@ int sync_free_client(int *fds, int len)
 int sync_heartbeat_set(char *key)
 {
     int ret = 0;
+    if(is_wirte) return -1;
 #if 1
     map_t *data;
     client_info *ci;
@@ -205,6 +212,7 @@ int sync_heartbeat_set(char *key)
 int sync_heartbeat_handle(char *key)
 {
     int ret = 0;
+    if(is_wirte) return -1;
 #if 1
     map_t *data;
     client_info *ci;
@@ -262,6 +270,7 @@ int accept_client_tbl(int fd)
     time_t raw_time;
     time(&raw_time);
     client_info *ci;
+    is_wirte = 1;
 
     ci = (client_info*) malloc(sizeof(client_info));
     memset(ci, 0, sizeof(client_info));
@@ -270,6 +279,7 @@ int accept_client_tbl(int fd)
     put(&tree, (char *)&(ci->fd), ci);
     printf("accept_client_tbl fd=%d raw_time %ld\r\n", ci->fd,ci->ctime);
     fresh_table();
+    is_wirte = 0;
     return 0;
 }
 
@@ -279,6 +289,7 @@ void add_fd_set()
     time_t raw_time;
     time(&raw_time);
     client_info *ci = NULL;
+     if(is_wirte) return ;
     if (NULL != table)
     {
         printf("add_fd_set\r\n 1");
@@ -313,6 +324,7 @@ int find_max_fd()
     int i = 0;
     client_info *ci = NULL;
     int maxfd = 0;
+     if(is_wirte) return maxfd;
     if (NULL != table)
     {
         for (i = 0; i < curr_count; i++)
@@ -341,6 +353,7 @@ void force_client_close(client_info *ci)
 {
     map_t *data;
     int fd;
+    is_wirte = 1;
     if (NULL != ci)
     {
         printf("force_client_close %s %d \r\n", ci->code, ci->fd);
@@ -366,6 +379,7 @@ void force_client_close(client_info *ci)
         } 
     }
     fresh_table();
+    is_wirte = 0;
 }
 
 void clear_exist_client(char *key)
@@ -391,7 +405,7 @@ void save_client(int fd, char *key)
     client_info *newci;
     client_info *p;
     map_t *data;
-
+    is_wirte = 1;
     printf("auth success %s %d \r\n", key, fd);
 
     data = get(&tree, (char *)&(fd));
@@ -427,12 +441,14 @@ void save_client(int fd, char *key)
     }
 
       fresh_table();
+      is_wirte = 0;
 }
 
 client_info *client_list(int *count)
 {
     int size = 0;
     int i;
+     if(is_wirte) return NULL;
     client_info **table = (client_info **)sync_read_mapclient_list(&size, 1);
     if (size == 0)
         return NULL;
@@ -455,6 +471,7 @@ client_info *get_client(char *session)
     int ret;
     map_t *node;
     client_info *ci = NULL;
+    if(is_wirte) return NULL;
     node = get(&tree, session);
     if (NULL != node)
     {
