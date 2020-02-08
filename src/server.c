@@ -11,10 +11,12 @@
 #include "client_table.h"
 #include <time.h>
 #include "crc.h"
+#include <signal.h>
 int LISTENER_PORT;
 
 void starp_server(void)
 {
+    signal(SIGPIPE,SIG_IGN);
     client_tbl_init();
     
     int fd = listener_socket();
