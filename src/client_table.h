@@ -13,7 +13,6 @@
 #include "client_info.h"
 
 extern fd_set read_set;
-extern unsigned char is_wirte;
 void client_tbl_init(void);
 
 int accept_client_tbl(int fd);
