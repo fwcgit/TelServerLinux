@@ -318,6 +318,7 @@ void add_fd_set()
     time_t raw_time;
     time(&raw_time);
     client_info *ci = NULL;
+    fresh_table();
      if(pthread_rwlock_rdlock(&rwlock) == 0)
      {
          if (NULL != table)
