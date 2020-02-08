@@ -35,7 +35,7 @@ void* read_client(void *args)
     while(is_run())
     {
         char *data;
-        client_info *info           = NULL;
+        
         void **tableClient          = NULL;
 
         FD_ZERO(&read_set);
@@ -60,6 +60,7 @@ void* read_client(void *args)
         else
         {
             tableClient = sync_read_mapclient_list(&count,0);
+            
             int retimout = 0;
             if(NULL != tableClient)
             {
@@ -67,7 +68,7 @@ void* read_client(void *args)
                 for(i = 0 ; i < count ;i++)
                 {
                     totalBytes = 0;
-                    info = (client_info *)(*(tableClient+i));
+                    client_info *info = (client_info *)(*(tableClient+i));
                     if(info == NULL) continue; 
                     if(info->fd < 0 || info->fd >= 1024) continue;
                     log_flush("info fd ------------------%d-------------------\r\n",info->fd);
@@ -192,7 +193,7 @@ void* read_client(void *args)
                         }
                     }
                 }
-            
+                free(tableClient);
             }
             else
             {

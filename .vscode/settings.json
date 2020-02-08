@@ -3,7 +3,9 @@
         "h_thread.h": "c",
         "socket.h": "c",
         "client_info.h": "c",
-        "server.h": "c"
+        "server.h": "c",
+        "algorithm": "c",
+        "array": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }
