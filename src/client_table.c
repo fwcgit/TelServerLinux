@@ -28,58 +28,62 @@ void fresh_table()
     int count = 0;
     int auth_count = 0;
     map_t *node;
-    pthread_rwlock_rdlock(&rwlock);//请求读锁
-    for (node = map_first(&tree); node; node = map_next(&(node->node)))
+    if(pthread_rwlock_rdlock(&rwlock) == 0) //请求读锁
     {
-        count++;
-        client_info *ci = (client_info *)node->val;
-        printf("Node Key %s %d\r\n",ci->code,ci->fd);
-    }
-    if (count > 0)
-    {
-        if(table)
-        {
-             free(table);
-            
-            table = NULL;
-        }
-        if(authtable)
-        {
-             free(authtable);
-             authtable = NULL;
-        }
-
-
-        table = (void **)malloc(sizeof(void *) * count);
-        authtable = (void **)malloc(sizeof(void *) * count);
-        int i = 0;
-       
         for (node = map_first(&tree); node; node = map_next(&(node->node)))
         {
+            count++;
             client_info *ci = (client_info *)node->val;
-            if (ci->isAuth)
-            {
-                *(authtable + auth_count) = ci;
-                auth_count++;
-            }
-                *(table + i) = ci;
-                i++;
-            
+            printf("Node Key %s %d\r\n",ci->code,ci->fd);
         }
-    }
-    else
-    {
-        if(table) free(table);
-        if(authtable) free(authtable);
+        if (count > 0)
+        {
+            if(table)
+            {
+                free(table);
+                
+                table = NULL;
+            }
+            if(authtable)
+            {
+                free(authtable);
+                authtable = NULL;
+            }
 
-        table = NULL;
-        authtable = NULL;
-    }
-    
 
-    curr_auth_count = auth_count;
-    curr_count = count;
-    pthread_rwlock_unlock(&rwlock);//解锁
+            table = (void **)malloc(sizeof(void *) * count);
+            authtable = (void **)malloc(sizeof(void *) * count);
+            int i = 0;
+        
+            for (node = map_first(&tree); node; node = map_next(&(node->node)))
+            {
+                client_info *ci = (client_info *)node->val;
+                if (ci->isAuth)
+                {
+                    *(authtable + auth_count) = ci;
+                    auth_count++;
+                }
+                    *(table + i) = ci;
+                    i++;
+                
+            }
+        }
+        else
+        {
+            if(table) free(table);
+            if(authtable) free(authtable);
+
+            table = NULL;
+            authtable = NULL;
+        }
+        
+
+        curr_auth_count = auth_count;
+        curr_count = count;
+
+         pthread_rwlock_unlock(&rwlock);//解锁
+    }
+   
 
     printf("fresh_table curr_auth_count %d curr_count %d \r\n",curr_auth_count,curr_count);
 }
@@ -88,15 +92,17 @@ void fresh_table()
  **/
 void **sync_read_mapclient_list(int *size, char isAuth)
 {   
-    pthread_rwlock_rdlock(&rwlock);//请求读锁
-    
-    if (isAuth)
+    if(pthread_rwlock_rdlock(&rwlock) == 0)//请求读锁
     {
-        *size = curr_auth_count;
-        return authtable;
+         if (isAuth)
+        {
+            *size = curr_auth_count;
+            return authtable;
+        }
+        *size = curr_count;
+        pthread_rwlock_unlock(&rwlock);//解锁 
     }
-    *size = curr_count;
-    pthread_rwlock_unlock(&rwlock);//解锁 
+
     return table;
 }
 
@@ -115,33 +121,36 @@ void sync_find_auth_timeout_client()
 
     if(is_wirte) return;
 
-    pthread_rwlock_wrlock(&rwlock);//请求写锁
-    if (curr_count > 0)
+    if(pthread_rwlock_wrlock(&rwlock) == 0)//请求写锁
     {
-        time(&raw_time);
-        fds = (int *)malloc(sizeof(int) * curr_count);
-        for (i = 0; i < curr_count; i++)
+        if (curr_count > 0)
         {
-            ci = (client_info *)*(table + i);
-            if(ci)
+            time(&raw_time);
+            fds = (int *)malloc(sizeof(int) * curr_count);
+            for (i = 0; i < curr_count; i++)
             {
-                if (raw_time - ci->ctime >= 10 && !ci->isAuth)
+                ci = (client_info *)*(table + i);
+                if(ci)
                 {
-                    *(fds + c_len) = ci->fd;
-                    c_len++;
+                    if (raw_time - ci->ctime >= 10 && !ci->isAuth)
+                    {
+                        *(fds + c_len) = ci->fd;
+                        c_len++;
+                    }
                 }
+
+            }
+            if (c_len > 0)
+            {
+                sync_free_client(fds, c_len);
             }
 
+            free(fds);
+            fds = NULL;
         }
-        if (c_len > 0)
-        {
-            sync_free_client(fds, c_len);
-        }
-
-        free(fds);
-        fds = NULL;
+        pthread_rwlock_unlock(&rwlock);//解锁
     }
-     pthread_rwlock_unlock(&rwlock);//解锁
+
 #endif
 }
 
@@ -156,16 +165,19 @@ int sync_remove_list_client(int fd)
     int i;
     is_wirte = 1;
     close(fd);
-    pthread_rwlock_wrlock(&rwlock);//请求写锁
-    data = get(&tree, (char *)&fd);
-    if (data)
+    if(pthread_rwlock_wrlock(&rwlock) == 0)//请求写锁
     {
-        rb_erase(&data->node, &tree);
-        map_free(data);
+        data = get(&tree, (char *)&fd);
+        if (data)
+        {
+            rb_erase(&data->node, &tree);
+            map_free(data);
+        }
+        fresh_table();
+        is_wirte = 0;
+        pthread_rwlock_unlock(&rwlock);//解锁
     }
-    fresh_table();
-    is_wirte = 0;
-    pthread_rwlock_unlock(&rwlock);//解锁
+    
     return 0;
 }
 
@@ -179,25 +191,28 @@ int sync_free_client(int *fds, int len)
     map_t *data;
     int i;
     is_wirte = 1;
-    pthread_rwlock_wrlock(&rwlock);//请求写锁
-    for (i = 0; i < len; i++)
+    if(pthread_rwlock_wrlock(&rwlock) == 0)//请求写锁
     {
-        data = get(&tree, (char *)&(*(fds + i)));
-        if (data)
+        for (i = 0; i < len; i++)
         {
-            rb_erase(&data->node, &tree);
-            map_free(data);
+            data = get(&tree, (char *)&(*(fds + i)));
+            if (data)
+            {
+                rb_erase(&data->node, &tree);
+                map_free(data);
+            }
         }
+
+        for (i = 0; i < len; i++)
+        {
+            close(*(fds + i));
+        }
+    
+        fresh_table();
+        is_wirte = 0;
+        pthread_rwlock_unlock(&rwlock);//解锁
     }
 
-     for (i = 0; i < len; i++)
-    {
-        close(*(fds + i));
-    }
-   
-    fresh_table();
-    is_wirte = 0;
-     pthread_rwlock_unlock(&rwlock);//解锁
     return 0;
 }
 
@@ -208,21 +223,24 @@ int sync_heartbeat_set(char *key)
 {
     int ret = 0;
     if(is_wirte) return -1;
-    pthread_rwlock_rdlock(&rwlock);//请求读锁
-#if 1
-    map_t *data;
-    client_info *ci;
-    data = get(&tree, key);
-    if (data)
+    if(pthread_rwlock_rdlock(&rwlock) == 0)
     {
-        ci = (client_info *)data->val;
-        if (ci->isAuth)
-        {
-            ci->ioTimeout++;
-        }
-    }
-#endif
-pthread_rwlock_unlock(&rwlock);//解锁
+        #if 1
+            map_t *data;
+            client_info *ci;
+            data = get(&tree, key);
+            if (data)
+            {
+                ci = (client_info *)data->val;
+                if (ci->isAuth)
+                {
+                    ci->ioTimeout++;
+                }
+            }
+        #endif
+        pthread_rwlock_unlock(&rwlock);//解锁
+    }//请求读锁
+
     return ret;
 }
 
@@ -233,24 +251,27 @@ int sync_heartbeat_handle(char *key)
 {
     int ret = 0;
     if(is_wirte) return -1;
-     pthread_rwlock_rdlock(&rwlock);//请求读锁
-#if 1
-    map_t *data;
-    client_info *ci;
+     if(pthread_rwlock_rdlock(&rwlock) == 0)
+     {
+         #if 1
+            map_t *data;
+            client_info *ci;
 
-    data = get(&tree, key);
-    if (data)
-    {
-        ci = (client_info *)data->val;
-        
-        if (ci->isAuth)
-        {
-             send_data_pack(ci->fd,MSG_TYPE_HEART,"",0);
-            ci->ioTimeout = 0;
-        }
-    }
-#endif
-pthread_rwlock_unlock(&rwlock);//解锁
+            data = get(&tree, key);
+            if (data)
+            {
+                ci = (client_info *)data->val;
+                
+                if (ci->isAuth)
+                {
+                    send_data_pack(ci->fd,MSG_TYPE_HEART,"",0);
+                    ci->ioTimeout = 0;
+                }
+            }
+        #endif
+        pthread_rwlock_unlock(&rwlock);//解锁
+     }//请求读锁
+
     return ret;
 }
 
@@ -293,16 +314,19 @@ int accept_client_tbl(int fd)
     time(&raw_time);
     client_info *ci;
     is_wirte = 1;
-    pthread_rwlock_wrlock(&rwlock);//请求写锁
-    ci = (client_info*) malloc(sizeof(client_info));
-    memset(ci, 0, sizeof(client_info));
-    ci->fd = fd;
-    ci->ctime = raw_time;
-    put(&tree, (char *)&(ci->fd), ci);
-    printf("accept_client_tbl fd=%d raw_time %ld\r\n", ci->fd,ci->ctime);
-    fresh_table();
-    is_wirte = 0;
-    pthread_rwlock_unlock(&rwlock);//解锁
+    if(pthread_rwlock_wrlock(&rwlock) == 0)
+    {
+        ci = (client_info*) malloc(sizeof(client_info));
+        memset(ci, 0, sizeof(client_info));
+        ci->fd = fd;
+        ci->ctime = raw_time;
+        put(&tree, (char *)&(ci->fd), ci);
+        printf("accept_client_tbl fd=%d raw_time %ld\r\n", ci->fd,ci->ctime);
+        fresh_table();
+        is_wirte = 0;
+        pthread_rwlock_unlock(&rwlock);//解锁
+    }//请求写锁
+
     return 0;
 }
 
@@ -313,33 +337,37 @@ void add_fd_set()
     time(&raw_time);
     client_info *ci = NULL;
      if(is_wirte) return ;
-     pthread_rwlock_rdlock(&rwlock);//请求读锁
-    if (NULL != table)
-    {
-        //printf("add_fd_set\r\n 1");
-        for (i = 0; i < curr_count; i++)
+     if(pthread_rwlock_rdlock(&rwlock) == 0)
+     {
+         if (NULL != table)
         {
-             //printf("add_fd_set\r\n 2");
-            ci = (client_info *)(*(table + i));
-             //printf("add_fd_set\r\n 3");
-            if (NULL == ci)
+            //printf("add_fd_set\r\n 1");
+            for (i = 0; i < curr_count; i++)
             {
-                printf("ci = NULL \r\n");
-            }
-            else
-            {
-                 //printf("add_fd_set\r\n 4");
-                //printf("add_fd_set %d \r\n 4",ci->fd);
-                 if(ci->fd > 0 && ci->fd < 1024)
-                 {
-                      FD_SET(ci->fd, &read_set);
-                 }
-               
-                 //printf("add_fd_set\r\n 5");
+                //printf("add_fd_set\r\n 2");
+                ci = (client_info *)(*(table + i));
+                //printf("add_fd_set\r\n 3");
+                if (NULL == ci)
+                {
+                    printf("ci = NULL \r\n");
+                }
+                else
+                {
+                    //printf("add_fd_set\r\n 4");
+                    //printf("add_fd_set %d \r\n 4",ci->fd);
+                    if(ci->fd > 0 && ci->fd < 1024)
+                    {
+                        FD_SET(ci->fd, &read_set);
+                    }
+                
+                    //printf("add_fd_set\r\n 5");
+                }
             }
         }
-    }
-    pthread_rwlock_unlock(&rwlock);//解锁
+        pthread_rwlock_unlock(&rwlock);//解锁
+     }
+     //请求读锁
+
 
    // printf("++++++++++++++++++++++++++++++++++++++++add_fd_set raw_time %ld \r\n ",raw_time);
 }
@@ -350,28 +378,31 @@ int find_max_fd()
     client_info *ci = NULL;
     int maxfd = 0;
      if(is_wirte) return maxfd;
-     pthread_rwlock_rdlock(&rwlock);//请求读锁
-    if (NULL != table)
-    {
-        for (i = 0; i < curr_count; i++)
+     if(pthread_rwlock_rdlock(&rwlock)==0)
+     {
+        if (NULL != table)
         {
-            ci = (client_info *)(*(table + i));
-            if (NULL != ci && ci->fd < 1024 && ci->fd >0)
+            for (i = 0; i < curr_count; i++)
             {
-                if(ci->fd > 0)
+                ci = (client_info *)(*(table + i));
+                if (NULL != ci && ci->fd < 1024 && ci->fd >0)
                 {
-                     if (maxfd < ci->fd)
-                        maxfd = ci->fd;
+                    if(ci->fd > 0)
+                    {
+                        if (maxfd < ci->fd)
+                            maxfd = ci->fd;
+                    }
+                
                 }
-               
-            }
-            else
-            {
-                printf("find_max_fd NULL \r\n");
+                else
+                {
+                    printf("find_max_fd NULL \r\n");
+                }
             }
         }
-    }
-pthread_rwlock_unlock(&rwlock);//解锁
+        pthread_rwlock_unlock(&rwlock);//解锁
+     }//请求读锁
+
     return maxfd;
 }
 
@@ -380,34 +411,37 @@ void force_client_close(client_info *ci)
     map_t *data;
     int fd;
     is_wirte = 1;
-    pthread_rwlock_wrlock(&rwlock);//请求写锁
-    if (NULL != ci)
+    if(pthread_rwlock_wrlock(&rwlock) == 0)
     {
-        printf("force_client_close %s %d \r\n", ci->code, ci->fd);
-        fd = ci->fd;
-        if(fd > 3)
+        if (NULL != ci)
         {
-            close(fd);
-        }
-        data = get(&tree, ci->code);
-        if (data)
-        {
-            rb_erase(&(data->node), &tree);
-            map_free(data);
-            client_off_line(ci->code);
-            send_user("M0001",MSG_TYPE_CMD,"change",6);
-        }
+            printf("force_client_close %s %d \r\n", ci->code, ci->fd);
+            fd = ci->fd;
+            if(fd > 3)
+            {
+                close(fd);
+            }
+            data = get(&tree, ci->code);
+            if (data)
+            {
+                rb_erase(&(data->node), &tree);
+                map_free(data);
+                client_off_line(ci->code);
+                send_user("M0001",MSG_TYPE_CMD,"change",6);
+            }
 
-        data = get(&tree, (char *)&fd);
-        if (data)
-        {
-            rb_erase(&(data->node), &tree);
-            map_free(data);
-        } 
-    }
-    fresh_table();
-    is_wirte = 0;
-    pthread_rwlock_unlock(&rwlock);//解锁
+            data = get(&tree, (char *)&fd);
+            if (data)
+            {
+                rb_erase(&(data->node), &tree);
+                map_free(data);
+            } 
+        }
+        fresh_table();
+        is_wirte = 0;
+        pthread_rwlock_unlock(&rwlock);//解锁
+    }//请求写锁
+
 }
 
 void clear_exist_client(char *key)
@@ -415,7 +449,8 @@ void clear_exist_client(char *key)
     int ret;
     map_t *data;
     client_info *ci;
-pthread_rwlock_wrlock(&rwlock);//请求写锁
+if(pthread_rwlock_wrlock(&rwlock) == 0)
+{
     data = get(&tree, key);
     if (data)
     {
@@ -426,6 +461,8 @@ pthread_rwlock_wrlock(&rwlock);//请求写锁
         }
     }
     pthread_rwlock_unlock(&rwlock);//解锁
+}//请求写锁
+
 }
 void save_client(int fd, char *key)
 {
@@ -435,7 +472,8 @@ void save_client(int fd, char *key)
     map_t *data;
     is_wirte = 1;
     printf("auth success %s %d \r\n", key, fd);
-pthread_rwlock_wrlock(&rwlock);//请求写锁
+if(pthread_rwlock_wrlock(&rwlock) == 0)
+{
     data = get(&tree, (char *)&(fd));
     if (data)
     {
@@ -471,6 +509,8 @@ pthread_rwlock_wrlock(&rwlock);//请求写锁
       fresh_table();
       is_wirte = 0;
           pthread_rwlock_unlock(&rwlock);//解锁
+}//请求写锁
+
 }
 
 client_info *client_list(int *count)
@@ -478,20 +518,23 @@ client_info *client_list(int *count)
     int size = 0;
     int i;
      if(is_wirte) return NULL;
-     pthread_rwlock_rdlock(&rwlock);//请求读锁
-    client_info **table = (client_info **)sync_read_mapclient_list(&size, 1);
-    if (size == 0)
-        return NULL;
-    client_info *list = (client_info *)malloc(sizeof(client_info) * size);
-    if (NULL != table)
+    if( pthread_rwlock_rdlock(&rwlock) == 0)
     {
-        *count = size;
-        for (i = 0; i < size; i++)
+        client_info **table = (client_info **)sync_read_mapclient_list(&size, 1);
+        if (size == 0)
+            return NULL;
+        client_info *list = (client_info *)malloc(sizeof(client_info) * size);
+        if (NULL != table)
         {
-            *(list + i) = *(*(table + i));
+            *count = size;
+            for (i = 0; i < size; i++)
+            {
+                *(list + i) = *(*(table + i));
+            }
         }
-    }
-pthread_rwlock_unlock(&rwlock);//解锁
+    pthread_rwlock_unlock(&rwlock);//解锁
+    }//请求读锁
+
     return list;
 }
 
@@ -502,26 +545,29 @@ client_info *get_client(char *session)
     map_t *node;
     client_info *ci = NULL;
     if(is_wirte) return NULL;
-    pthread_rwlock_rdlock(&rwlock);//请求读锁
-    node = get(&tree, session);
-    if (NULL != node)
+    if(pthread_rwlock_rdlock(&rwlock) == 0)
     {
-        ci = (client_info *)node->val;
-        if (NULL != ci)
+        node = get(&tree, session);
+        if (NULL != node)
         {
-            printf("get_client %s %d \r\n", ci->code, ci->fd);
+            ci = (client_info *)node->val;
+            if (NULL != ci)
+            {
+                printf("get_client %s %d \r\n", ci->code, ci->fd);
+            }
+            else
+            {
+            printf("get_client client_info NULL");
+            }
+            
         }
         else
         {
-           printf("get_client client_info NULL");
+            printf("get_client Node NULL");
         }
         
-    }
-    else
-    {
-        printf("get_client Node NULL");
-    }
-    
-pthread_rwlock_unlock(&rwlock);//解锁
+    pthread_rwlock_unlock(&rwlock);//解锁
+    }//请求读锁
+
     return ci;
 }
