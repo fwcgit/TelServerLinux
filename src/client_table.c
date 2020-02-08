@@ -364,7 +364,7 @@ int find_max_fd()
 
                 if(ci == NULL) continue; 
 
-                if(sizeof(*info) != sizeof(client_info))continue;
+                if(sizeof(*ci) != sizeof(client_info))continue;
 
                 if (NULL != ci && ci->fd < 1024 && ci->fd >0)
                 {
