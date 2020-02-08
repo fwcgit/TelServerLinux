@@ -71,7 +71,6 @@ void* read_client(void *args)
                     client_info *info = (client_info *)(*(tableClient+i));
                     if(info == NULL) continue; 
                     if(info->fd < 0 || info->fd >= 1024) continue;
-                    log_flush("info fd ------------------%d-------------------\r\n",info->fd);
                     if(FD_ISSET(info->fd,&read_set))
                     {
                         memset(&buff, 0, sizeof(buff));
