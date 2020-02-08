@@ -60,7 +60,7 @@ void fresh_table()
                 memcpy(info,*ci,sizeof(client_info));
                 if (ci->isAuth)
                 {
-                    *(authtable + auth_count) = *info;
+                    *(authtable + auth_count) = &info;
                     auth_count++;
                 }
                     *(table + i) = ci;
