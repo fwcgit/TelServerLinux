@@ -36,8 +36,17 @@ void fresh_table()
     }
     if (count > 0)
     {
-        if(table) free(table);
-        if(authtable) free(authtable);
+        if(table)
+        {
+             free(table);
+            
+            table = NULL;
+        }
+        if(authtable)
+        {
+             free(authtable);
+             authtable = NULL;
+        }
 
 
         table = (void **)malloc(sizeof(void *) * count);
@@ -130,6 +139,7 @@ void sync_find_auth_timeout_client()
         }
 
         free(fds);
+        fds = NULL;
     }
 #endif
 }
@@ -466,6 +476,7 @@ client_info *client_list(int *count)
         }
 
         free(table);
+        table = NULL;
     }
 
     return list;

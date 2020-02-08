@@ -53,7 +53,9 @@ JNIEXPORT jlong JNICALL Java_com_fu_server_ServerLib_sendCmd
     memcpy(data, (char*)&cmd, 1);
     ret = send_user(user_s,MSG_TYPE_CMD,data,1);
     free(data);
+    data = NULL;
     free(user_s);
+    user_s = NULL;
     
     return ret;
 }
@@ -193,6 +195,7 @@ JNIEXPORT jobjectArray JNICALL Java_com_fu_server_ServerLib_getClientList
 	}
 
 	free(table);
+  table = NULL;
 	return objarray;
 
 }
