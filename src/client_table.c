@@ -317,7 +317,6 @@ void add_fd_set()
     int i = 0;
     time_t raw_time;
     time(&raw_time);
-    client_info *ci = NULL;
     fresh_table();
      if(pthread_rwlock_rdlock(&rwlock) == 0)
      {
@@ -325,7 +324,7 @@ void add_fd_set()
         {
             for (i = 0; i < curr_count; i++)
             {
-                ci = (client_info *)(*(table + i));
+                client_info *ci  = (client_info *)(*(table + i));
                 if (NULL == ci)
                 {
                     printf("ci = NULL \r\n");
