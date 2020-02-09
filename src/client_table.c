@@ -56,14 +56,12 @@ void fresh_table()
             for (node = map_first(&tree); node; node = map_next(&(node->node)))
             {
                 client_info *ci = (client_info *)node->val;
-                client_info info;
-                memcpy(&info,ci,sizeof(client_info));
                 if (ci->isAuth)
                 {
-                    *(authtable + auth_count) = &info;
+                    *(authtable + auth_count) = ci;
                     auth_count++;
                 }
-                    *(table + i) = &info;
+                    *(table + i) = ci;
                     i++;
                 
             }
