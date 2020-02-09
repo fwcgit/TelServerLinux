@@ -63,7 +63,7 @@ void fresh_table()
                     *(authtable + auth_count) = &info;
                     auth_count++;
                 }
-                    *(table + i) = ci;
+                    *(table + i) = &info;
                     i++;
                 
             }
