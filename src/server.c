@@ -74,6 +74,8 @@ ssize_t send_data_pack(int fd,char type,char *data,size_t len)
         memcpy(user_data+FRAME_HEAD_SIZE,data,len);
         printOldData(user_data,data_len);
         ssize_t s_len = send_data(fd,type,user_data,data_len);
+        free(user_data);
+        user_data = NULL;
         return s_len;
 }
 ssize_t send_data(int fd,char type,char *data,size_t len)
@@ -123,6 +125,11 @@ ssize_t send_user(char *session,char type,char *data,size_t len)
     {
         log_flush("send user client %s \n",ci->code);
         ret = send_data_pack(ci->fd,type, data, len);
+        if(ret <= 0)
+        {
+            log_flush("send user  client fail %s\n",session);
+            force_client_close(ci);
+        }
     }
     else
     {
