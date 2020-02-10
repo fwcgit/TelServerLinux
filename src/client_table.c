@@ -352,8 +352,7 @@ int find_max_fd()
     int i = 0;
     client_info *ci = NULL;
     int maxfd = 0;
-     if(pthread_rwlock_rdlock(&rwlock)==0)
-     {
+
         if (NULL != table)
         {
             for (i = 0; i < curr_count; i++)
@@ -378,8 +377,6 @@ int find_max_fd()
                     printf("find_max_fd NULL \r\n");
                 }
             }
-        }
-        pthread_rwlock_unlock(&rwlock);//解锁
      }//请求读锁
 
     return maxfd;

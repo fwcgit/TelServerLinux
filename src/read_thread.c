@@ -55,7 +55,7 @@ void* read_client(void *args)
         }
         else if(ret == 0)
         {
-           //log_flush("select read time out! \n");
+           log_flush("select read time out! \n");
         }
         else
         {
