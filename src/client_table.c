@@ -28,7 +28,6 @@ void fresh_table()
     int auth_count = 0;
     map_t *node;
 
-     printf("pthread_rwlock_rdlock\r\n");
     if(pthread_rwlock_tryrdlock(&rwlock) == 0) //请求读锁
     {
         for (node = map_first(&tree); node; node = map_next(&(node->node)))

@@ -40,14 +40,13 @@ void* read_client(void *args)
 
         FD_ZERO(&read_set);
         FD_SET(sockFD,&read_set);
-        log_flush("add_fd_set ! \n");
 	    add_fd_set();
         maxfd = find_max_fd();
         maxfd = sockFD > maxfd ? sockFD : maxfd;
         tv.tv_sec = 1;
         tv.tv_usec = 0;
         
-        log_flush("select read ! \n");
+
         ret = select(maxfd+1,&read_set,NULL,NULL,&tv);
         
         if(ret < 0 )
@@ -57,7 +56,7 @@ void* read_client(void *args)
         }
         else if(ret == 0)
         {
-           log_flush("select read time out! \n");
+           //log_flush("select read time out! \n");
         }
         else
         {
@@ -204,7 +203,6 @@ void* read_client(void *args)
   
         }
 
-        log_flush("read ..................\r\n");
     }
 
       log_flush("read exit\r\n");
