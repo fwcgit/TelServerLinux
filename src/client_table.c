@@ -121,8 +121,6 @@ void sync_find_auth_timeout_client()
     time_t raw_time;
     int *fds;
 
-    if(pthread_rwlock_trywrlock(&rwlock) == 0)//请求写锁
-    {
         if (curr_count > 0)
         {
             time(&raw_time);
@@ -140,7 +138,6 @@ void sync_find_auth_timeout_client()
                 }
 
             }
-            pthread_rwlock_unlock(&rwlock);//解锁
 
             if (c_len > 0)
             {
@@ -152,12 +149,6 @@ void sync_find_auth_timeout_client()
             fds = NULL;
         }
         
-    }
-    else
-    {
-       pthread_rwlock_unlock(&rwlock);//解锁
-    }
-
 #endif
 }
 
@@ -171,21 +162,15 @@ int sync_remove_list_client(int fd)
     map_t *data;
     int i;
     close(fd);
-    if(pthread_rwlock_trywrlock(&rwlock) == 0)//请求写锁
-    {
+
         data = get(&tree, (char *)&fd);
         if (data)
         {
             rb_erase(&data->node, &tree);
             map_free(data);
         }
-        pthread_rwlock_unlock(&rwlock);//解锁
         fresh_table();
-    }
-    else
-    {
-       pthread_rwlock_unlock(&rwlock);//解锁
-    }
+
     
     return 0;
 }
@@ -309,21 +294,15 @@ int accept_client_tbl(int fd)
     time_t raw_time;
     time(&raw_time);
     client_info *ci;
-    if(pthread_rwlock_trywrlock(&rwlock) == 0)
-    {
-        ci = (client_info*) malloc(sizeof(client_info));
-        memset(ci, 0, sizeof(client_info));
-        ci->fd = fd;
-        ci->ctime = raw_time;
-        put(&tree, (char *)&(ci->fd), ci);
-        printf("accept_client_tbl fd=%d raw_time %ld\r\n", ci->fd,ci->ctime);
-        pthread_rwlock_unlock(&rwlock);//解锁
-        fresh_table();
-    }//请求写锁
-    else
-    {
-       pthread_rwlock_unlock(&rwlock);//解锁
-    }
+
+    ci = (client_info*) malloc(sizeof(client_info));
+    memset(ci, 0, sizeof(client_info));
+    ci->fd = fd;
+    ci->ctime = raw_time;
+    put(&tree, (char *)&(ci->fd), ci);
+    printf("accept_client_tbl fd=%d raw_time %ld\r\n", ci->fd,ci->ctime);
+    fresh_table();
+
 
     return 0;
 }
@@ -334,8 +313,6 @@ void add_fd_set()
     time_t raw_time;
     time(&raw_time);
     fresh_table();
-     if(pthread_rwlock_tryrdlock(&rwlock) == 0)
-     {
          if (NULL != table)
         {
             for (i = 0; i < curr_count; i++)
@@ -356,13 +333,8 @@ void add_fd_set()
                 }
             }
         }
-        pthread_rwlock_unlock(&rwlock);//解锁
-     }
-     else
-    {
-       pthread_rwlock_unlock(&rwlock);//解锁
-    }
-     //请求读锁
+    
+
 
 
    // printf("++++++++++++++++++++++++++++++++++++++++add_fd_set raw_time %ld \r\n ",raw_time);
@@ -398,7 +370,7 @@ int find_max_fd()
                     printf("find_max_fd NULL \r\n");
                 }
             }
-     }//请求读锁
+     }
 
     return maxfd;
 }
@@ -407,8 +379,6 @@ void force_client_close(client_info *ci)
 {
     map_t *data;
     int fd;
-    if(pthread_rwlock_trywrlock(&rwlock) == 0)
-    {
         if (NULL != ci)
         {
             printf("force_client_close %s %d \r\n", ci->code, ci->fd);
@@ -434,13 +404,8 @@ void force_client_close(client_info *ci)
             } 
         }
        
-        pthread_rwlock_unlock(&rwlock);//解锁
          fresh_table();
-    }//请求写锁
-    else
-    {
-       pthread_rwlock_unlock(&rwlock);//解锁
-    }
+
 
 }
 
@@ -467,8 +432,6 @@ void save_client(int fd, char *key)
     client_info *p;
     map_t *data;
     printf("auth success %s %d \r\n", key, fd);
-if(pthread_rwlock_trywrlock(&rwlock) == 0)
-{
     data = get(&tree, (char *)&(fd));
     if (data)
     {
@@ -502,14 +465,7 @@ if(pthread_rwlock_trywrlock(&rwlock) == 0)
     }
 
       fresh_table();
-          pthread_rwlock_unlock(&rwlock);//解锁
-}//请求写锁
-else
-    {
-       pthread_rwlock_unlock(&rwlock);//解锁
-    }
 
-}
 
 client_info *client_list(int *count)
 {
