@@ -204,6 +204,8 @@ void* read_client(void *args)
 
         log_flush("read ..................\r\n");
     }
+
+      log_flush("read exit\r\n");
     return (void*)NULL;
 }
 
