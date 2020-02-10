@@ -465,7 +465,7 @@ void save_client(int fd, char *key)
     }
 
       fresh_table();
-
+}
 
 client_info *client_list(int *count)
 {
