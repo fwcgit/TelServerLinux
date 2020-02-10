@@ -82,6 +82,11 @@ void fresh_table()
 
          pthread_rwlock_unlock(&rwlock);//解锁
     }
+    else
+    {
+       pthread_rwlock_unlock(&rwlock);//解锁
+    }
+    
 
     printf("fresh_table curr_auth_count %d curr_count %d \r\n",curr_auth_count,curr_count);
 }
@@ -148,6 +153,10 @@ void sync_find_auth_timeout_client()
         }
         
     }
+    else
+    {
+       pthread_rwlock_unlock(&rwlock);//解锁
+    }
 
 #endif
 }
@@ -172,6 +181,10 @@ int sync_remove_list_client(int fd)
         }
         pthread_rwlock_unlock(&rwlock);//解锁
         fresh_table();
+    }
+    else
+    {
+       pthread_rwlock_unlock(&rwlock);//解锁
     }
     
     return 0;
@@ -307,6 +320,10 @@ int accept_client_tbl(int fd)
         pthread_rwlock_unlock(&rwlock);//解锁
         fresh_table();
     }//请求写锁
+    else
+    {
+       pthread_rwlock_unlock(&rwlock);//解锁
+    }
 
     return 0;
 }
@@ -341,6 +358,10 @@ void add_fd_set()
         }
         pthread_rwlock_unlock(&rwlock);//解锁
      }
+     else
+    {
+       pthread_rwlock_unlock(&rwlock);//解锁
+    }
      //请求读锁
 
 
@@ -416,6 +437,10 @@ void force_client_close(client_info *ci)
         pthread_rwlock_unlock(&rwlock);//解锁
          fresh_table();
     }//请求写锁
+    else
+    {
+       pthread_rwlock_unlock(&rwlock);//解锁
+    }
 
 }
 
@@ -479,6 +504,10 @@ if(pthread_rwlock_trywrlock(&rwlock) == 0)
       fresh_table();
           pthread_rwlock_unlock(&rwlock);//解锁
 }//请求写锁
+else
+    {
+       pthread_rwlock_unlock(&rwlock);//解锁
+    }
 
 }
 
