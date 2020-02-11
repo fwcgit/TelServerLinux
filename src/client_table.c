@@ -117,21 +117,21 @@ void sync_find_auth_timeout_client()
     int index = 0;
     int c_len = 0;
     int i = 0;
-    client_info *ci;
     time_t raw_time;
     int *fds;
-
+    fresh_table();
         if (curr_count > 0)
         {
             time(&raw_time);
             fds = (int *)malloc(sizeof(int) * curr_count);
             for (i = 0; i < curr_count; i++)
             {
-                ci = (client_info *)*(table + i);
+                client_info *ci = (client_info *)*(table + i);
                 if(ci)
                 {
                     if (raw_time - ci->ctime >= 10 && !ci->isAuth)
                     {
+                        if(ci->fd < 0 || ci->fd >= 1024) continue;
                         *(fds + c_len) = ci->fd;
                         c_len++;
                     }
