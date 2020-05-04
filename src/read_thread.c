@@ -59,6 +59,7 @@ void* read_client(void *args)
         }
         else
         {
+            
             tableClient = sync_read_mapclient_list(&count,0);
             
             int retimout = 0;

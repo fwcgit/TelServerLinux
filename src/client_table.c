@@ -37,17 +37,6 @@ void fresh_table()
         }
         if (count > 0)
         {
-            if(table)
-            {
-                free(table);
-                table = NULL;
-            }
-            if(authtable)
-            {
-                free(authtable);
-                authtable = NULL;
-            }
-
 
             table = (void **)malloc(sizeof(void *) * count);
             authtable = (void **)malloc(sizeof(void *) * count);
