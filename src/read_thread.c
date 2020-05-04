@@ -46,6 +46,7 @@ void* read_client(void *args)
         tv.tv_sec = 1;
         tv.tv_usec = 0;
         
+
         ret = select(maxfd+1,&read_set,NULL,NULL,&tv);
         
         if(ret < 0 )
@@ -202,7 +203,10 @@ void* read_client(void *args)
             
   
         }
+
     }
+
+      log_flush("read exit\r\n");
     return (void*)NULL;
 }
 
