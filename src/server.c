@@ -8,15 +8,15 @@
 
 #include "server.h"
 #include "client_info.h"
-#include "client_table.h"
 #include <time.h>
 #include "crc.h"
 int LISTENER_PORT;
+int fds[MAX_CLIENT] = {-1};
+int fds_cnt = 0;
+fd_set read_set;
 
 void starp_server(void)
 {
-    client_tbl_init();
-    
     int fd = listener_socket();
     if(fd > 0)
     {
@@ -113,33 +113,14 @@ ssize_t send_data(int fd,char type,char *data,size_t len)
     return ret;
 }
 
-ssize_t send_user(char *session,char type,char *data,size_t len)
-{
-    client_info *ci = get_client(session);
-    ssize_t ret = 0;
-    if(NULL != ci)
-    {
-        printf("send user client %s \n",ci->code);
-        ret = send_data_pack(ci->fd,type, data, len);
-    }
-    else
-    {
-        ret = -1;
-        printf("send user no client %s\n",session);
-    }
-    
-    return ret;
-}
-
-client_info *get_client_list(int *count)
-{
-	return client_list(count);
-}
-
 void stop_server(void)
 {
     stop_thread();
     close_socket();
+    for(int i = 0; i < fds_cnt; i++)
+    {
+        close(fds[i]);
+    }
 }
 
 void pack_data(char *data,void *msg,size_t m_len,char *src,size_t s_len)
@@ -148,4 +129,15 @@ void pack_data(char *data,void *msg,size_t m_len,char *src,size_t s_len)
     
     memcpy(data, msg, m_len);
     memcpy(data+m_len, src, s_len);
+}
+
+int find_max_fd(void)
+{
+    int max = 0;
+    for(int i = 0; i < fds_cnt; i++)
+    {
+        if(max < fds[i])
+            max = fds[i];
+    }
+    return max;
 }

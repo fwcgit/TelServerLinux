@@ -11,8 +11,12 @@
 #include "socket.h"
 #include "h_thread.h"
 #include "client_info.h"
+#define MAX_CLIENT 1024
 
 extern unsigned int client_count;
+extern int fds[MAX_CLIENT];
+extern int fds_cnt;
+extern fd_set read_set;
 
 void starp_server(void);
 
@@ -26,11 +30,16 @@ ssize_t send_data_pack(int fd,char type,char *data,size_t len);
 
 ssize_t send_data(int fd,char type,char *data,size_t len);
 
-ssize_t send_user(char *session,char type,char *data,size_t len);
-
-client_info *get_client_list(int *count);
-
 void pack_data(char *data,void *msg,size_t m_len,char *src,size_t s_len);
 
+int find_max_fd(void);
+
+void new_user_connect(int fd);
+
+void accept_new_user(int fd,char *key);
+
+void user_heartbeat(int fd,char *key);
+
+void client_disconnect(int fd);
 
 #endif /* server_h */

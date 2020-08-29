@@ -35,8 +35,6 @@ void start_thread(int sockfd)
     start_accept_thread();
 	start_read_thread();
 	start_handle_thread();
-	start_auth_thread();
-	start_heart_thread();
 }
 
 void stop_thread(void)

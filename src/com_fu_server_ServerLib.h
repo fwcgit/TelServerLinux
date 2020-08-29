@@ -26,18 +26,18 @@ JNIEXPORT void JNICALL Java_com_fu_server_ServerLib_closeServer
 /*
  * Class:     com_fu_server_ServerLib
  * Method:    sendData
- * Signature: (Ljava/lang/String;[B)J
+ * Signature: (I[B)J
  */
 JNIEXPORT jlong JNICALL Java_com_fu_server_ServerLib_sendData
-  (JNIEnv *, jobject, jstring, jbyteArray);
+  (JNIEnv *, jobject, jint, jbyteArray);
 
 /*
  * Class:     com_fu_server_ServerLib
  * Method:    sendCmd
- * Signature: (Ljava/lang/String;B)J
+ * Signature: (IB)J
  */
 JNIEXPORT jlong JNICALL Java_com_fu_server_ServerLib_sendCmd
-  (JNIEnv *, jobject, jstring, jbyte);
+  (JNIEnv *, jobject, jint, jbyte);
 
 /*
  * Class:     com_fu_server_ServerLib
@@ -49,11 +49,11 @@ JNIEXPORT void JNICALL Java_com_fu_server_ServerLib_closeClient
 
 /*
  * Class:     com_fu_server_ServerLib
- * Method:    getClientList
- * Signature: ()[Ljava/lang/String;
+ * Method:    refreshFds
+ * Signature: ([II)V
  */
-JNIEXPORT jobjectArray JNICALL Java_com_fu_server_ServerLib_getClientList
-  (JNIEnv *, jobject);
+JNIEXPORT void JNICALL Java_com_fu_server_ServerLib_refreshFds
+  (JNIEnv *, jobject, jintArray, jint);
 
 #ifdef __cplusplus
 }

@@ -13,7 +13,6 @@
 #include<string.h>
 #include <sys/time.h>
 #include "server.h"
-#include "client_info.h"
 #include "crc.h"
 #include <stdarg.h>
 #include <limits.h>
@@ -40,55 +39,11 @@ char* int_to_str(int val)
     return str;
 }
 
-void send_test_data(void)
-{
-    char text[4096 * 10];
-    memset(text, 'C', 4096 * 10);
-    printf("send_user\r\n");
-    send_user(key, MSG_TYPE_DATA,text, 4096 * 10);
-}
-
-void send_lar_data(void)
-{
-    char cmd[2];
-    cmd[0] = (char)0xA0;
-    cmd[1] = (char)0x10;
-    printf("send_user\r\n");
-    send_user(key, MSG_TYPE_DATA,cmd, 2);
-}
-
-void send_ir_data(void)
-{
-       char cmd[2];
-    cmd[0] = (char)0xA0;
-    cmd[1] = (char)0x11;
-    printf("send_user\r\n");
-    send_user(key, MSG_TYPE_DATA,cmd, 2);
-}
-
-void send_txt_data(void)
-{
-    char text[10];
-    memset(text, 'A',10);
-    printf("send_user\r\n");
-    send_user(key, MSG_TYPE_DATA,text, 10);
-}
 
 int main(int argc, const char * argv[]) {
 
 //client_tbl_init();
-void **tab = (void **)malloc(sizeof(void *) * 10);
-client_info *ci1 = (client_info *)malloc(sizeof(client_info));
-ci1->fd = 100;
-client_info *ci2 = (client_info *)malloc(sizeof(client_info));
-ci2->fd = 102;
- *(tab+0) = ci1;
- *(tab+1) = ci2;  
 
- client_info *pc = (client_info *)*(tab+0); 
- printf("main %d \n",pc->fd);
- pc = (client_info *)*(tab+1); 
- printf("main %d \n",pc->fd);
 #if 1
 	client_info  *table;
 	int count,i;
@@ -109,31 +64,16 @@ ci2->fd = 102;
         else if(strstr(sessio,"send"))
         {
             //send_test_data();
-            send_txt_data();
         }
         else if(strstr(sessio,"lar"))
         {
-           send_lar_data();
         }
         else if(strstr(sessio,"ir"))
         {
-            send_ir_data();
         }
 		else if(strstr(sessio,"ls"))
         
 		{
-			printf("get_client_list\n");
-            count = 0;
-			table = get_client_list(&count);
-			if(count > 0)
-			{
-				for(i = 0 ; i < count ;i++)
-				{				
-					printf("%d-client_id code:%s\n",i+1,(table+i)->code);
-				}
-				free(table);
-			}
-
 			
 		}
     }

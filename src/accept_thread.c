@@ -8,7 +8,8 @@
 
 #include "h_thread.h"
 #include "log.h"
-#include "client_table.h"
+#include "server.h"
+
 void* accept_client(void *args)
 {
     char *reqCode = "reqCode";
@@ -30,11 +31,13 @@ void* accept_client(void *args)
         tv.tv_sec = 5;
         tv.tv_usec = 0;
         
+        log_flush("accept client \n");
+
         ret = select(sockFD+1,&rec_fd_set,NULL,NULL,&tv);
         
         if(ret < 0)
         {
-            perror("accept_client select error \n");
+            perror("accept_client select error %d \n");
         }
         else if(ret == 0)
         {
@@ -49,15 +52,19 @@ void* accept_client(void *args)
             if(new_fd <=0 )
             {
                 log_flush("accept client error \n");
-                continue;
             }
-            int flags = fcntl(new_fd, F_GETFL, 0);         //获取文件的flags值。
-            fcntl(new_fd, F_SETFL, flags | O_NONBLOCK);   //设置成非阻塞模式；
+            else
+            {
+                int flags = fcntl(new_fd, F_GETFL, 0);         //获取文件的flags值。
+                fcntl(new_fd, F_SETFL, flags | O_NONBLOCK);   //设置成非阻塞模式；
 
-            accept_client_tbl(new_fd);
+                new_user_connect(new_fd);
+                
+                send_data_pack(new_fd, MSG_TYPE_ID,reqCode, strlen(reqCode));
             
-            send_data_pack(new_fd, MSG_TYPE_ID,reqCode, strlen(reqCode));
+            }
             
+
             log_flush("connected client ip:%s new_fd:%d ret:%d \r\n", inet_ntoa(client_in.sin_addr),new_fd,ret);
 		
         }

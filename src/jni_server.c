@@ -9,9 +9,6 @@ Description:
 #include "server.h"
 #include "log.h"
 #include "jni.h"
-#include "client_info.h"
-
-#include "j_callback.h"
 #include "crc.h"
 
 char logStr[200];
@@ -40,47 +37,6 @@ JNIEXPORT void JNICALL Java_com_fu_server_ServerLib_starpServer
 	jlog(1,"jni server init....");
 }
 
-JNIEXPORT jlong JNICALL Java_com_fu_server_ServerLib_sendCmd
-(JNIEnv *env, jobject obj, jstring session, jbyte cmd)
-{
-    ssize_t ret;
-    const char *c_session;
-    char *user_s;
-    
-    c_session = (*env)->GetStringUTFChars(env,session,0);
-  
-    char *data = (char *)malloc(sizeof(char));
-    memcpy(data, (char*)&cmd, 1);
-    ret = send_user(user_s,MSG_TYPE_CMD,data,1);
-    free(data);
-    free(user_s);
-    
-    return ret;
-}
-
-JNIEXPORT jlong JNICALL Java_com_fu_server_ServerLib_sendData
-(JNIEnv *env, jobject obj, jstring session, jbyteArray bytes)
-{
-    ssize_t ret = 0;
-    const char *c_session;
-    char log[10];
-    
-    int len = (*env)->GetArrayLength(env,bytes);
-    jbyte *j_bytes = (*env)->GetByteArrayElements(env,bytes,0);
-    jbyte data[len];
-    memcpy(data,j_bytes,len);
-    c_session = (*env)->GetStringUTFChars(env,session,0);
-
-    send_user((char *)c_session, MSG_TYPE_DATA,(char *)data, len);
-
-    if(j_bytes)
-    {
-      (*env)->ReleaseByteArrayElements(env,bytes, j_bytes, 0);
-    }
-
-    return ret;
-}
-
 /*
  * Class:     com_fu_server_ServerLib
  * Method:    closeServer
@@ -92,46 +48,93 @@ JNIEXPORT void JNICALL Java_com_fu_server_ServerLib_closeServer
 	stop_server();
 }
 
-
-void client_online(char *session)
+void client_disconnect(int fd)
 {
-    int ret;
-    JNIEnv *env;
-    
-    log_flush("client_online {%s} \r\n",session);
-#if 1
-    if(NULL != gVM)
-    {
-        ret = (*gVM)->AttachCurrentThread(gVM,(void **)&env,NULL);
-        if(ret == 0 && NULL != env)
-        {
-            jclass cls = (*env)->GetObjectClass(env,gObj);
-            jmethodID mid =(*env)->GetMethodID(env,cls,"newClientConnect","(Ljava/lang/String;)V");
-            (*env)->CallVoidMethod(env,gObj,mid,(*env)->NewStringUTF(env,session));
-            
-            (*gVM)->DetachCurrentThread(gVM);
-        }
-    }
-#endif
+	int ret;
+	JNIEnv *env;
+	close(fd);
+	if(NULL != gVM)
+	{
+		ret = (*gVM)->AttachCurrentThread(gVM,(void **)&env,NULL);
+		if(ret == 0 && NULL != env)
+		{
+			jclass cls = (*env)->GetObjectClass(env,gObj);
+			jmethodID mid =(*env)->GetMethodID(env,cls,"clientDisConnect","(I)V");
+			(*env)->CallVoidMethod(env,gObj,mid,fd);
+			
+			(*gVM)->DetachCurrentThread(gVM);
+		}
+	}
+}
+/*
+*新的用户连接
+*fd:用户描述符
+*/
+void new_user_connect(int fd)
+{
+	int ret;
+	JNIEnv *env;
+
+	if(NULL != gVM)
+	{
+		ret = (*gVM)->AttachCurrentThread(gVM,(void **)&env,NULL);
+		if(ret == 0 && NULL != env)
+		{
+			jclass cls = (*env)->GetObjectClass(env,gObj);
+			jmethodID mid =(*env)->GetMethodID(env,cls,"newUserConnect","(I)V");
+			(*env)->CallVoidMethod(env,gObj,mid,fd);
+			
+			(*gVM)->DetachCurrentThread(gVM);
+		}
+	}
 }
 
-void client_off_line(char *session)
+/*
+*接收新的用户
+*fd:用户描述符
+*key:用户ID
+*/
+void accept_new_user(int fd,char *key)
 {
-    int ret;
-    JNIEnv *env;
-    
-    if(NULL != gVM)
-    {
-        ret = (*gVM)->AttachCurrentThread(gVM,(void **)&env,NULL);
-        if(ret == 0 && NULL != env)
-        {
-            jclass cls = (*env)->GetObjectClass(env,gObj);
-            jmethodID mid =(*env)->GetMethodID(env,cls,"closeClinetConnect","(Ljava/lang/String;)V");
-            (*env)->CallVoidMethod(env,gObj,mid,(*env)->NewStringUTF(env,session));
-            
-            (*gVM)->DetachCurrentThread(gVM);
-        }
-    }
+	int ret;
+	JNIEnv *env;
+
+	if(NULL != gVM)
+	{
+		ret = (*gVM)->AttachCurrentThread(gVM,(void **)&env,NULL);
+		if(ret == 0 && NULL != env)
+		{
+			jclass cls = (*env)->GetObjectClass(env,gObj);
+			jmethodID mid =(*env)->GetMethodID(env,cls,"acceptNewUser","(ILjava/lang/String;)V");
+			(*env)->CallVoidMethod(env,gObj,mid,fd,(*env)->NewStringUTF(env,key));
+			
+			(*gVM)->DetachCurrentThread(gVM);
+		}
+	}
+}
+
+/*
+*用户心跳
+*fd:用户描述符
+*key:用户ID
+*/
+void user_heartbeat(int fd,char *key)
+{
+	int ret;
+	JNIEnv *env;
+
+	if(NULL != gVM)
+	{
+		ret = (*gVM)->AttachCurrentThread(gVM,(void **)&env,NULL);
+		if(ret == 0 && NULL != env)
+		{
+			jclass cls = (*env)->GetObjectClass(env,gObj);
+			jmethodID mid =(*env)->GetMethodID(env,cls,"userHeartbeat","(ILjava/lang/String;)V");
+			(*env)->CallVoidMethod(env,gObj,mid,fd,(*env)->NewStringUTF(env,key));
+			
+			(*gVM)->DetachCurrentThread(gVM);
+		}
+	}
 }
 
 void jlog(int type,char *ch)
@@ -152,52 +155,88 @@ void jlog(int type,char *ch)
 		}
 	}
 }
+
+/*
+ * Class:     com_fu_server_ServerLib
+ * Method:    sendData
+ * Signature: (I[B)J
+ */
+JNIEXPORT jlong JNICALL Java_com_fu_server_ServerLib_sendData
+  (JNIEnv *env, jobject obj, jint fd, jbyteArray array)
+  {
+    ssize_t ret = 0;
+    
+    int len = (*env)->GetArrayLength(env,array);
+    jbyte *j_bytes = (*env)->GetByteArrayElements(env,array,0);
+    jbyte data[len];
+    memcpy(data,j_bytes,len);
+
+    send_data_pack(fd, MSG_TYPE_DATA,(char *)data, len);
+
+    if(j_bytes)
+    {
+      (*env)->ReleaseByteArrayElements(env,array, j_bytes, 0);
+    }
+
+    return ret;
+  }
+
+/*
+ * Class:     com_fu_server_ServerLib
+ * Method:    sendCmd
+ * Signature: (IB)J
+ */
+JNIEXPORT jlong JNICALL Java_com_fu_server_ServerLib_sendCmd
+  (JNIEnv *env, jobject obj, jint fd, jbyte cmd)
+  {
+	ssize_t ret;
+    
+    char *data = (char *)malloc(sizeof(char));
+    memcpy(data, (char*)&cmd, 1);
+    ret = send_data_pack(fd,MSG_TYPE_CMD,data,1);
+    free(data);
+    data = NULL;
+    
+    return ret;
+  }
+
 /*
  * Class:     com_fu_server_ServerLib
  * Method:    closeClient
  * Signature: (I)V
  */
 JNIEXPORT void JNICALL Java_com_fu_server_ServerLib_closeClient
-  (JNIEnv *env, jobject ojb, jint session)
-{
-	
-}
+  (JNIEnv *env, jobject obj, jint fd)
+  {
+	  close(fd);
+  }
 
 /*
  * Class:     com_fu_server_ServerLib
- * Method:    getClientList
- * Signature: ()[Ljava/lang/String;
+ * Method:    refreshFds
+ * Signature: ([II)V
  */
-JNIEXPORT jobjectArray JNICALL Java_com_fu_server_ServerLib_getClientList
-  (JNIEnv *env, jobject obj)
-{
-	int count;
-	client_info *table;
-	jobjectArray objarray;
-	jclass cls;
-	int i;
-
-	table = get_client_list(&count);
-
-	if(NULL == table)
+JNIEXPORT void JNICALL Java_com_fu_server_ServerLib_refreshFds
+  (JNIEnv *env, jobject obj, jintArray _fds, jint len)
+  {
+	if(len > 0)
 	{
-		return NULL;
+		(*env)->GetIntArrayRegion(env,_fds,0,len,fds);
+		fds_cnt = len;
+		for(int i =0; i < len; i++)
+		{
+			log_flush("%d:%d\r\n",i,fds[i]);
+		}
 	}
-
-	cls = (*env)->FindClass(env,"java/lang/String");
-	objarray = (*env)->NewObjectArray(env,count,cls,NULL);
-
-	for(i = 0 ; i < count ; i++)
+	else
 	{
-		(*env)->SetObjectArrayElement(env,objarray,i,(*env)->NewStringUTF(env,(table+i)->code));
+		memset(fds,-1,fds_cnt);
+		fds_cnt = 0;
+		
 	}
+	
 
-	free(table);
-	return objarray;
-
-}
-
-
+  }
 jint JNI_OnLoad(JavaVM *vm,void *reservd)
 {
 	gVM = vm;

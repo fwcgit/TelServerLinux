@@ -7,17 +7,33 @@
 //
 
 #include "h_thread.h"
-#include "client_table.h"
 #include "crc.h"
 #include "log.h"
-
+#include "server.h"
 #define READ_WAIT_TIME  20 * 1000
+
+void add_fd_set()
+{
+    time_t raw_time;
+    time(&raw_time);
+
+        for (int i = 0; i < fds_cnt; i++)
+        {
+
+        if(fds[i] > 0 && fds[i] < 1024)
+        {
+            FD_SET(fds[i], &read_set);
+        }
+            
+        }
+   // printf("++++++++++++++++++++++++++++++++++++++++add_fd_set raw_time %ld \r\n ",raw_time);
+}
 
 void* read_client(void *args)
 {
-    int i                       = 0;
     int maxfd                   = 0;
     int ret                     = 0;
+    int s_fd                    = -1;
     ssize_t rec                 = 0;
     ssize_t totalBytes          = 0;
     ssize_t data_len            = 0;
@@ -35,12 +51,9 @@ void* read_client(void *args)
     while(is_run())
     {
         char *data;
-        client_info *info           = NULL;
-        void **tableClient          = NULL;
-
         FD_ZERO(&read_set);
         FD_SET(sockFD,&read_set);
-	    add_fd_set();
+        add_fd_set();
         maxfd = find_max_fd();
         maxfd = sockFD > maxfd ? sockFD : maxfd;
         tv.tv_sec = 0;
@@ -59,41 +72,39 @@ void* read_client(void *args)
         }
         else
         {
-            tableClient = sync_read_mapclient_list(&count,0);
+
             int retimout = 0;
-            if(NULL != tableClient)
-            {
-                
-                for(i = 0 ; i < count ;i++)
+
+                for(int i = 0 ; i < fds_cnt ;i++)
                 {
+                    s_fd = fds[i];
                     totalBytes = 0;
-                    info = (client_info *)(*(tableClient+i));
-                    if(FD_ISSET(info->fd,&read_set))
+                    if(FD_ISSET(fds[i],&read_set))
                     {
                         memset(&buff, 0, sizeof(buff));
-                        rec = recv(info->fd, buff, FRAME_HEAD_SIZE, MSG_DONTWAIT);
+                        rec = recv(s_fd, buff, FRAME_HEAD_SIZE, MSG_DONTWAIT);
                         while(rec == 0 && retimout++ < 10)
                         {
                             usleep(READ_WAIT_TIME);
-                            rec = recv(info->fd, buff, FRAME_HEAD_SIZE, MSG_DONTWAIT);
+                            rec = recv(s_fd, buff, FRAME_HEAD_SIZE, MSG_DONTWAIT);
                         }
                         if(rec > 0)
                         {
                             totalBytes += rec;
                             while(totalBytes < FRAME_HEAD_SIZE)
                             {
-                                rec = recv(info->fd, buff+totalBytes, 1, MSG_DONTWAIT);
+                                rec = recv(s_fd, buff+totalBytes, 1, MSG_DONTWAIT);
                                 retimout = 0;    
                                 while(rec == 0 && retimout++ < 10)
                                 {
                                     usleep(READ_WAIT_TIME);
-                                    rec = recv(info->fd, buff+totalBytes, 1, MSG_DONTWAIT);
+                                    rec = recv(s_fd, buff+totalBytes, 1, MSG_DONTWAIT);
                                 }
 
                                 if(rec <= 0)
                                 {
+                                    client_disconnect(s_fd);
                                     log_flush("read data fail 1 %ld \r\n",rec);
-                                    force_client_close(info);
                                     break;
                                 } 
                                 totalBytes  += rec;
@@ -123,17 +134,17 @@ void* read_client(void *args)
 
                                         while(totalBytes < data_len)
                                         {
-                                            rec = recv(info->fd, buff+totalBytes, data_len, MSG_DONTWAIT);
+                                            rec = recv(s_fd, buff+totalBytes, data_len, MSG_DONTWAIT);
                                             retimout = 0;    
                                             while(rec == 0 && retimout++ < 10)
                                             {
                                                 usleep(READ_WAIT_TIME);
-                                                rec = recv(info->fd, buff+totalBytes, data_len, MSG_DONTWAIT);
+                                                rec = recv(s_fd, buff+totalBytes, data_len, MSG_DONTWAIT);
                                             }
                                             if(rec <= 0)
                                             {
+                                                client_disconnect(s_fd);
                                                 log_flush("read data fail 1 %ld \r\n",rec);
-                                                force_client_close(info);
                                                 break;
                                             } 
                                             totalBytes  += rec;
@@ -160,17 +171,17 @@ void* read_client(void *args)
                                                 pk->head.len = user_data_len;
                                                 memcpy(pk->head.key,data,KEY_LEN);
                             
-                                                pk->fd    = info->fd;
+                                                pk->fd    = s_fd;
                                                 pk->data  = data;
                                                 add_list(list, pk);
                                                 
-                                                    int i = 0;
-                                                    
-                                                    for(i = 0; i < user_data_len; i++)
-                                                    {
-                                                            log_flush("%02X--",*(data+i));
-                                                    }
-                                                    log_flush("--------------------\r\n");
+                                                int i = 0;
+                                                
+                                                for(i = 0; i < user_data_len; i++)
+                                                {
+                                                        log_flush("%02X--",*(data+i));
+                                                }
+                                                log_flush("--------------------\r\n");
                                                 log_flush("recv %s Len:%ld\n",data,data_len);
                                             }
 
@@ -183,20 +194,13 @@ void* read_client(void *args)
                         }
                         else if(rec <= 0)
                         {
+                            client_disconnect(s_fd);
                             log_flush("read data fail 2  %ld \r\n",rec);
-                            force_client_close(info);
                             
                         }
                     }
                 }
             
-            }
-            else
-            {
-                log_flush("read NULL\r\n");
-            }
-            
-  
         }
     }
     return (void*)NULL;
