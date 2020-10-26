@@ -32,6 +32,10 @@ ssize_t send_data(int fd,char type,char *data,size_t len);
 
 void pack_data(char *data,void *msg,size_t m_len,char *src,size_t s_len);
 
+void rece_user_data(char *key,char *data,size_t len);
+
+void rece_user_str(char *key,char *data,size_t len);
+
 int find_max_fd(void);
 
 void new_user_connect(int fd);

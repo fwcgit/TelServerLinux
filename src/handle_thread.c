@@ -12,7 +12,8 @@
 #include <time.h>
 #include "j_callback.h"
 #include "log.h"
-
+#include "server.h"
+char *hdata = "0";
 void get_time_str(char *buff)
 {
     time_t      rawtime;
@@ -47,11 +48,16 @@ void* handle_msg(void *args)
                     accept_new_user(pk->fd,key);
 					break;
 				case MSG_TYPE_CMD:
+                    rece_user_data(key,pk->data,pk->head.len);
 					break;
                 case MSG_TYPE_DATA:
+                    rece_user_str(key,pk->data,pk->head.len);
+                    break;
+                case MSG_TYPE_TRANSPOND:
                     break;
 				case MSG_TYPE_HEART:
-                    user_heartbeat(pk->fd,key);                    
+                    user_heartbeat(pk->fd,key);
+                    send_data_pack(pk->fd,MSG_TYPE_HEART,hdata,1);                   
                     log_flush("recv heartbeat %s \n",key);
 					break;
 			}
@@ -61,6 +67,7 @@ void* handle_msg(void *args)
 
             free(pk->data);
         	free(pk);
+            pk = NULL;
         }
     }
     

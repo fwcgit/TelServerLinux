@@ -4,18 +4,40 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+<<<<<<< HEAD
         {
             "name": "gcc build and debug active file",
             "type": "cppdbg",
             "request": "launch",
             "program": "${fileDirname}/${fileBasenameNoExtension}",
+=======
+        
+        {
+            "name": "gcc.exe build and debug active file",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${fileDirname}\\${fileBasenameNoExtension}.exe",
+>>>>>>> 689924669d20e4f694526b42601f246c0a21a663
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
+<<<<<<< HEAD
             "MIMode": "lldb",
             "preLaunchTask": "gcc build active file"
+=======
+            "MIMode": "gdb",
+            "miDebuggerPath": "C:\\TDM-GCC-64\\bin\\gdb.exe",
+            "setupCommands": [
+                {
+                    "description": "为 gdb 启用整齐打印",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "gcc.exe build active file"
+>>>>>>> 689924669d20e4f694526b42601f246c0a21a663
         }
     ]
 }

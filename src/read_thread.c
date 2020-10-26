@@ -56,8 +56,8 @@ void* read_client(void *args)
         add_fd_set();
         maxfd = find_max_fd();
         maxfd = sockFD > maxfd ? sockFD : maxfd;
-        tv.tv_sec = 0;
-        tv.tv_usec = 500;
+        tv.tv_sec = 1;
+        tv.tv_usec = 0;
         
         ret = select(maxfd+1,&read_set,NULL,NULL,&tv);
         
@@ -73,13 +73,15 @@ void* read_client(void *args)
         else
         {
 
-            int retimout = 0;
+                int retimout = 0;
 
                 for(int i = 0 ; i < fds_cnt ;i++)
                 {
                     s_fd = fds[i];
                     totalBytes = 0;
+                    retimout = 0;
                     if(FD_ISSET(fds[i],&read_set))
+
                     {
                         memset(&buff, 0, sizeof(buff));
                         rec = recv(s_fd, buff, FRAME_HEAD_SIZE, MSG_DONTWAIT);
@@ -143,8 +145,6 @@ void* read_client(void *args)
                                             }
                                             if(rec <= 0)
                                             {
-                                                client_disconnect(s_fd);
-                                                log_flush("read data fail 1 %ld \r\n",rec);
                                                 break;
                                             } 
                                             totalBytes  += rec;
@@ -169,6 +169,7 @@ void* read_client(void *args)
                                                 
                                                 pk->head.type = *(buff+KEY_LEN);
                                                 pk->head.len = user_data_len;
+                                                memset(pk->head.key,0,6);
                                                 memcpy(pk->head.key,data,KEY_LEN);
                             
                                                 pk->fd    = s_fd;
@@ -200,9 +201,11 @@ void* read_client(void *args)
                         }
                     }
                 }
-            
         }
+
     }
+
+      log_flush("read exit\r\n");
     return (void*)NULL;
 }
 

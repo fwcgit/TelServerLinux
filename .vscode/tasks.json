@@ -2,16 +2,28 @@
     "tasks": [
         {
             "type": "shell",
+<<<<<<< HEAD
             "label": "gcc build active file",
             "command": "/usr/bin/gcc",
+=======
+            "label": "gcc.exe build active file",
+            "command": "C:\\TDM-GCC-64\\bin\\gcc.exe",
+>>>>>>> 689924669d20e4f694526b42601f246c0a21a663
             "args": [
                 "-g",
                 "${file}",
                 "-o",
+<<<<<<< HEAD
                 "${fileDirname}/${fileBasenameNoExtension}"
             ],
             "options": {
                 "cwd": "/usr/bin"
+=======
+                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+            ],
+            "options": {
+                "cwd": "C:\\TDM-GCC-64\\bin"
+>>>>>>> 689924669d20e4f694526b42601f246c0a21a663
             }
         }
     ],

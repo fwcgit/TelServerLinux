@@ -28,10 +28,6 @@ void start_read_thread(void);
 
 void start_handle_thread(void);
 
-void start_auth_thread(void);
-
-void start_heart_thread(void);
-
 unsigned char is_run(void);
 
 void close_read_client_fd(int fd);

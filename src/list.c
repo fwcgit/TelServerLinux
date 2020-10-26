@@ -180,6 +180,7 @@ void remove_list(List *list,int index)
             node = node->next;
         }
         free(((ListNode *)node->next)->data);
+        ((ListNode *)node->next)->data = NULL;
         node->next = ((ListNode *)node->next)->next;
     }
     

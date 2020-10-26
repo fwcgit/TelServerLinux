@@ -21,8 +21,6 @@ void* accept_client(void *args)
     int ret = 1;
     tv.tv_sec = 0;
     tv.tv_usec = 500;
-    int sock_timeout = 1000;
-    char _LINGER = 0;
     while (is_run())
     {
         FD_ZERO(&rec_fd_set);
@@ -31,7 +29,7 @@ void* accept_client(void *args)
         tv.tv_sec = 5;
         tv.tv_usec = 0;
         
-        log_flush("accept client \n");
+        //log_flush("accept client \n");
 
         ret = select(sockFD+1,&rec_fd_set,NULL,NULL,&tv);
         

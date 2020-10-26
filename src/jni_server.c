@@ -48,6 +48,50 @@ JNIEXPORT void JNICALL Java_com_fu_server_ServerLib_closeServer
 	stop_server();
 }
 
+void rece_user_str(char *key,char *data,size_t len)
+{
+	int ret;
+	JNIEnv *env;
+	if(NULL != gVM)
+	{
+		ret = (*gVM)->AttachCurrentThread(gVM,(void **)&env,NULL);
+		if(ret == 0 && NULL != env)
+		{
+			jclass cls = (*env)->GetObjectClass(env,gObj);
+			jmethodID mid =(*env)->GetMethodID(env,cls,"receUserStr","(Ljava/lang/String;[BI)V");
+
+			jbyteArray array = (*env)->NewByteArray(env,len);
+			(*env)->SetByteArrayRegion(env,array,0,len,(jbyte *)data);
+
+			(*env)->CallVoidMethod(env,gObj,mid,key,array,len);
+			(*gVM)->DetachCurrentThread(gVM);
+
+		}
+	}
+}
+
+void rece_user_data(char *key,char *data,size_t len)
+{
+	int ret;
+	JNIEnv *env;
+	if(NULL != gVM)
+	{
+		ret = (*gVM)->AttachCurrentThread(gVM,(void **)&env,NULL);
+		if(ret == 0 && NULL != env)
+		{
+			jclass cls = (*env)->GetObjectClass(env,gObj);
+			jmethodID mid =(*env)->GetMethodID(env,cls,"receUserData","(Ljava/lang/String;[BI)V");
+
+			jbyteArray array = (*env)->NewByteArray(env,len);
+			(*env)->SetByteArrayRegion(env,array,0,len,(jbyte *)data);
+
+			(*env)->CallVoidMethod(env,gObj,mid,key,array,len);
+			(*gVM)->DetachCurrentThread(gVM);
+
+		}
+	}
+}
+
 void client_disconnect(int fd)
 {
 	int ret;

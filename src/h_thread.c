@@ -21,12 +21,6 @@ unsigned char is_run(void)
     return run;
 }
 
-
-void* accept_client_1(void *args)
-{
-	return NULL;
-}
-
 void start_thread(int sockfd)
 {
     run = 1;

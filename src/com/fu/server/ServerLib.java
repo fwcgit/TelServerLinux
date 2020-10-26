@@ -23,7 +23,6 @@ public class ServerLib{
 				synchronized (lock) {
 					Set<String> set = authClient.keySet();
 					Iterator<String> iterator = set.iterator();
-					
 					while(iterator.hasNext()) {
 						String key = iterator.next();
 						Client client = authClient.get(key);
@@ -108,6 +107,7 @@ public class ServerLib{
 		starpServer(port);
 	}
 	
+
 	public native void starpServer(int port);
 
 	public native void closeServer();

@@ -9,10 +9,11 @@
 #ifndef msg_h
 #define msg_h
 
-#define MSG_TYPE_ID     0x01 //上报唯一客户端ID
-#define MSG_TYPE_CMD    0x02 //执行指令
-#define MSG_TYPE_DATA   0x03 //数据
-#define MSG_TYPE_HEART  0x04 //心跳
+#define MSG_TYPE_ID         0x01 //上报唯一客户端ID
+#define MSG_TYPE_CMD        0x02 //执行指令
+#define MSG_TYPE_DATA       0x03 //数据
+#define MSG_TYPE_HEART      0x04 //心跳
+#define MSG_TYPE_TRANSPOND  0X05 //转发
 #define FRAME_HEAD_SIZE 8
 #define KEY_LEN         5
 

@@ -10,6 +10,9 @@
 #include "client_info.h"
 #include <time.h>
 #include "crc.h"
+#include <signal.h>
+#include "log.h"
+
 int LISTENER_PORT;
 int fds[MAX_CLIENT] = {-1};
 int fds_cnt = 0;
@@ -17,6 +20,8 @@ fd_set read_set;
 
 void starp_server(void)
 {
+    signal(SIGPIPE,SIG_IGN);
+
     int fd = listener_socket();
     if(fd > 0)
     {
@@ -42,10 +47,10 @@ void printOldData(char *data,ssize_t len)
     if(NULL != data && len > 0){
         for(i = 0; i < len; i++)
         {
-                printf("%02X--",*(data+i));
+                log_flush("%02X--",*(data+i));
         }
 
-        printf("\r\n");
+        log_flush("\r\n");
     }
  #endif
 }
@@ -72,6 +77,8 @@ ssize_t send_data_pack(int fd,char type,char *data,size_t len)
         memcpy(user_data+FRAME_HEAD_SIZE,data,len);
         printOldData(user_data,data_len);
         ssize_t s_len = send_data(fd,type,user_data,data_len);
+        free(user_data);
+        user_data = NULL;
         return s_len;
 }
 ssize_t send_data(int fd,char type,char *data,size_t len)
@@ -103,7 +110,7 @@ ssize_t send_data(int fd,char type,char *data,size_t len)
         
         if(s_len == 0)
         {
-            printf("send data fail %d\n",fd);
+            log_flush("send data fail %d\n",fd);
             return 0;
         }
         
@@ -112,6 +119,7 @@ ssize_t send_data(int fd,char type,char *data,size_t len)
     
     return ret;
 }
+
 
 void stop_server(void)
 {
