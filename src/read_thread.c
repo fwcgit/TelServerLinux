@@ -105,8 +105,6 @@ void* read_client(void *args)
 
                                 if(rec <= 0)
                                 {
-                                    client_disconnect(s_fd);
-                                    log_flush("read data fail 1 %ld \r\n",rec);
                                     break;
                                 } 
                                 totalBytes  += rec;
