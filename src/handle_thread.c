@@ -8,11 +8,10 @@
 
 #include "h_thread.h"
 #include "errno.h"
-#include "server.h"
+#include "hmsglist.h"
 #include <time.h>
 #include "j_callback.h"
 #include "log.h"
-#include "server.h"
 char *hdata = "0";
 void get_time_str(char *buff)
 {
@@ -29,14 +28,11 @@ void* handle_msg(void *args)
 {
     package *pk         = NULL;
     int ret             = 0;
-    
-    //node= poll_list(list);
-   
+       
     while(is_run())
     { 
         usleep(10 * 1000);
-        
-       // node = poll_list(list);
+        pk = (package *)get_msg();
         if(pk != NULL)
         {
             char *key = pk->head.key;

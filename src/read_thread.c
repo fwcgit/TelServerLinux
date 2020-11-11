@@ -10,6 +10,7 @@
 #include "crc.h"
 #include "log.h"
 #include "server.h"
+#include "hmsglist.h"
 #define READ_WAIT_TIME  20 * 1000
 
 void add_fd_set()
@@ -172,7 +173,7 @@ void* read_client(void *args)
                             
                                                 pk->fd    = s_fd;
                                                 pk->data  = data;
-                                                //add_list(list, pk);
+                                                add_msg(pk);
                                                 
                                                 int i = 0;
                                                 

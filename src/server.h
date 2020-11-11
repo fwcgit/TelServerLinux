@@ -16,7 +16,6 @@ extern unsigned int client_count;
 extern int fds[MAX_CLIENT];
 extern int fds_cnt;
 extern fd_set read_set;
-
 #ifdef __cplusplus
 extern "C" {
 #endif

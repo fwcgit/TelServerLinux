@@ -12,13 +12,11 @@
 #include "crc.h"
 #include <signal.h>
 #include "log.h"
-#include <queue>
 using namespace std;
 int LISTENER_PORT;
 int fds[MAX_CLIENT] = {-1};
 int fds_cnt = 0;
 fd_set read_set;
-
 void starp_server(void)
 {
     signal(SIGPIPE,SIG_IGN);
@@ -28,7 +26,7 @@ void starp_server(void)
     {
       start_thread(fd);
     }
-    
+
 }
 
 void init_config(int port)
