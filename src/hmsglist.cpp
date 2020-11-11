@@ -12,10 +12,8 @@ void add_msg(package *pk){
 void* get_msg()
 {
     if(msglist.empty()){
-        log_flush("msglist.empty\r\n");
         return (void*)NULL;
     }else{
-        log_flush("!msglist.empty\r\n");
         return msglist.front();
     }
     return (void*)NULL;
