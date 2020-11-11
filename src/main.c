@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "list.h"
 #include<string.h>
 #include <sys/time.h>
 #include "server.h"
