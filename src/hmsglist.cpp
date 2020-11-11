@@ -11,10 +11,12 @@ void add_msg(package *pk){
 
 void* get_msg()
 {
+    package *pk = NULL;
     if(msglist.empty()){
-        return (void*)NULL;
+        return pk;
     }else{
-        return msglist.front();
+        pk = msglist.front();
+        msglist.pop();
     }
-    return (void*)NULL;
+    return pk;
 }
