@@ -31,7 +31,7 @@ void* handle_msg(void *args)
        
     while(is_run())
     { 
-        usleep(10 * 1000);
+       
         pk = (package *)get_msg();
         if(pk != NULL)
         {
@@ -60,7 +60,9 @@ void* handle_msg(void *args)
 		// pk->fd,pk->head.type,pk->head.len,pk->body);
 
         	free(pk);
-            pk = NULL;
+            //pk = NULL;
+        }else{
+            usleep(10 * 1000);
         }
     }
     
