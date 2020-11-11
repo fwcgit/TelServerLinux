@@ -58,9 +58,9 @@ void* handle_msg(void *args)
 			
 		//	printf("handle msg fd %d--------type:%d---len:%d----buff %s \n",
 		// pk->fd,pk->head.type,pk->head.len,pk->body);
-
+            free(pk->data);
         	free(pk);
-            //pk = NULL;
+            pk = NULL;
         }else{
             usleep(10 * 1000);
         }
