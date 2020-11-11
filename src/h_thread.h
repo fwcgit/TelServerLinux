@@ -13,10 +13,7 @@
 #include <pthread.h>
 #include <errno.h>
 #include "socket.h"
-#include "list.h"
 #include "server.h"
-
-extern List *list;
 
 void start_thread(int sockfd);
 

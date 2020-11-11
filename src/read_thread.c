@@ -172,7 +172,7 @@ void* read_client(void *args)
                             
                                                 pk->fd    = s_fd;
                                                 pk->data  = data;
-                                                add_list(list, pk);
+                                                //add_list(list, pk);
                                                 
                                                 int i = 0;
                                                 
