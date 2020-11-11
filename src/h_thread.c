@@ -24,8 +24,6 @@ unsigned char is_run(void)
 void start_thread(int sockfd)
 {
     run = 1;
-
-    list = init_list(BACK_COUNT);
     start_accept_thread();
 	start_read_thread();
 	start_handle_thread();
