@@ -12,6 +12,7 @@
 #include "crc.h"
 #include <signal.h>
 #include "log.h"
+#include <queue>
 using namespace std;
 int LISTENER_PORT;
 int fds[MAX_CLIENT] = {-1};

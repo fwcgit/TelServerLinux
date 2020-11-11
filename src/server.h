@@ -11,7 +11,6 @@
 #include "socket.h"
 #include "h_thread.h"
 #include "client_info.h"
-#include <queue>
 #define MAX_CLIENT 1024
 extern unsigned int client_count;
 extern int fds[MAX_CLIENT];
