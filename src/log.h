@@ -7,8 +7,13 @@ Description:
 *************************************************************/
 #ifndef _LOG_H
 #define _LOG_H
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 extern char logStr[200];
 void jlog(int type,char *ch);
 void log_flush(const char *format,...);
+#ifdef __cplusplus
+}
+#endif
 #endif

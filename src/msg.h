@@ -16,7 +16,9 @@
 #define MSG_TYPE_TRANSPOND  0X05 //转发
 #define FRAME_HEAD_SIZE 8
 #define KEY_LEN         5
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 typedef struct m_head
 {
     char    		type;
@@ -32,5 +34,7 @@ typedef struct m_package
 }package;
 
 
-
+#ifdef __cplusplus
+}
+#endif
 #endif /* msg_h */

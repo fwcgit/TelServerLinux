@@ -8,9 +8,13 @@
 
 #ifndef j_callback_h
 #define j_callback_h
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 void client_online(char *session);
 
 void client_off_line(char *session);
-
+#ifdef __cplusplus
+}
+#endif
 #endif /* j_callback_h */

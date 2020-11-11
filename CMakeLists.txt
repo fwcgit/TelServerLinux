@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 2.8.6)
-SET(CMAKE_BUILD_TYPE "Debug")
-SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g2 -ggdb")
-SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
+set(CMAKE_CXX_COMPILER "g++")
 project(smartServer)
 link_libraries("-lpthread")
 AUX_SOURCE_DIRECTORY(src DIR_SRCS)

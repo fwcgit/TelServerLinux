@@ -12,7 +12,9 @@
 #define  uint16   unsigned short
 #endif  /* #ifndef  uint16 */
 
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*******************************************************************************
 * Function Name  : UART_CRC16
 * Description    : 2bytes CRC value calculate
@@ -22,5 +24,7 @@
 *******************************************************************************/
 uint16 CRC16(uint8 *px, uint16 ucLen);
 
-
+#ifdef __cplusplus
+}
+#endif
 #endif  /* #ifndef  _CRC_H_ */

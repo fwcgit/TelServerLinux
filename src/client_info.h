@@ -9,6 +9,10 @@
 #ifndef client_info_h
 #define client_info_h
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct clientInfo
 {
     int fd;
@@ -18,5 +22,7 @@ typedef struct clientInfo
     int ioTimeout;
     
 } client_info;
-
+#ifdef __cplusplus
+}
+#endif
 #endif /* client_info_h */

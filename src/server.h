@@ -11,12 +11,16 @@
 #include "socket.h"
 #include "h_thread.h"
 #include "client_info.h"
+#include <queue>
 #define MAX_CLIENT 1024
-
 extern unsigned int client_count;
 extern int fds[MAX_CLIENT];
 extern int fds_cnt;
 extern fd_set read_set;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void starp_server(void);
 
@@ -46,4 +50,7 @@ void user_heartbeat(int fd,char *key);
 
 void client_disconnect(int fd);
 
+#ifdef __cplusplus
+}
+#endif
 #endif /* server_h */

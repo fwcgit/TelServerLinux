@@ -31,13 +31,13 @@ void* handle_msg(void *args)
     ListNode *node      = NULL;
     int ret             = 0;
     
-    node= poll_list(list);
+    //node= poll_list(list);
    
     while(is_run())
     { 
         usleep(10 * 1000);
         
-        node = poll_list(list);
+       // node = poll_list(list);
         if(node != NULL)
         {
             pk = (package *)node->data;

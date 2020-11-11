@@ -15,6 +15,10 @@
 #include "socket.h"
 #include "server.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void start_thread(int sockfd);
 
 void stop_thread(void);
@@ -28,5 +32,7 @@ void start_handle_thread(void);
 unsigned char is_run(void);
 
 void close_read_client_fd(int fd);
-
+#ifdef __cplusplus
+}
+#endif
 #endif /* h_thread_h */

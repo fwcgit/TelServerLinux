@@ -31,9 +31,13 @@ typedef struct sockaddr sockAddr;
 extern int sockFD;
 extern int LISTENER_PORT;
 
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 int listener_socket(void);
 
 void close_socket(void);
-
+#ifdef __cplusplus
+}
+#endif
 #endif /* socket_h */
