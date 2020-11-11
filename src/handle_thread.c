@@ -28,7 +28,6 @@ void get_time_str(char *buff)
 void* handle_msg(void *args)
 {
     package *pk         = NULL;
-    ListNode *node      = NULL;
     int ret             = 0;
     
     //node= poll_list(list);
@@ -38,9 +37,8 @@ void* handle_msg(void *args)
         usleep(10 * 1000);
         
        // node = poll_list(list);
-        if(node != NULL)
+        if(pk != NULL)
         {
-            pk = (package *)node->data;
             char *key = pk->head.key;
             //printf("handlder key %s \r\n",key);
 			switch (pk->head.type) {

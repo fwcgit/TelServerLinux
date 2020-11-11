@@ -43,7 +43,8 @@
         "stdexcept": "c",
         "streambuf": "c",
         "utility": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "__node_handle": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }
