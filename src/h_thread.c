@@ -9,7 +9,6 @@
 #include "h_thread.h"
 
 unsigned char run = 0;
-List *list;
 
 pthread_t accept_pid;
 pthread_t read_pid;
