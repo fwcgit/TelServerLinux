@@ -9,9 +9,9 @@ void add_msg(package *pk){
 void* get_msg()
 {
     if(msglist.empty()){
-        return NULL;
+        return (void*)NULL;
     }else{
         return msglist.front();
     }
-    return NULL;
+    return (void*)NULL;
 }
