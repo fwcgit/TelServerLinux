@@ -63,7 +63,7 @@ void rece_user_str(char *key,char *data,size_t len)
 			jbyteArray array = (*env)->NewByteArray(env,len);
 			(*env)->SetByteArrayRegion(env,array,0,len,(jbyte *)data);
 
-			(*env)->CallVoidMethod(env,gObj,mid,key,array,len);
+			(*env)->CallVoidMethod(env,gObj,mid,(*env)->NewStringUTF(env,key),array,len);
 			(*gVM)->DetachCurrentThread(gVM);
 
 		}
@@ -85,7 +85,7 @@ void rece_user_data(char *key,char *data,size_t len)
 			jbyteArray array = (*env)->NewByteArray(env,len);
 			(*env)->SetByteArrayRegion(env,array,0,len,(jbyte *)data);
 
-			(*env)->CallVoidMethod(env,gObj,mid,key,array,len);
+			(*env)->CallVoidMethod(env,gObj,mid,(*env)->NewStringUTF(env,key),array,len);
 			(*gVM)->DetachCurrentThread(gVM);
 
 		}
@@ -107,7 +107,7 @@ void rece_user_transpond(char *key,char *tokey,char *data,size_t len)
 			jbyteArray array = (*env)->NewByteArray(env,len);
 			(*env)->SetByteArrayRegion(env,array,0,len,(jbyte *)data);
 
-			(*env)->CallVoidMethod(env,gObj,mid,key,tokey,array,len);
+			(*env)->CallVoidMethod(env,gObj,mid,(*env)->NewStringUTF(env,key),(*env)->NewStringUTF(env,tokey),array,len);
 			(*gVM)->DetachCurrentThread(gVM);
 
 		}
