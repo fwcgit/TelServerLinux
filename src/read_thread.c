@@ -39,7 +39,7 @@ void* read_client(void *args)
     ssize_t totalBytes          = 0;
     ssize_t data_len            = 0;
     unsigned long packageLen    = 0;
-    char buff[1024];
+    char buff[1024 * 10];
     int recv_timout = 1000;
     struct timeval tv;
     
