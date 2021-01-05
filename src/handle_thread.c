@@ -49,8 +49,10 @@ void* handle_msg(void *args)
                     rece_user_str(key,pk->data,pk->head.len);
                     break;
                 case MSG_TYPE_TRANSPOND:
+                    log_flush("MSG_TYPE_TRANSPOND %s \n",key);
                     memset(TO_ID,0,6);
                     memcpy(TO_ID,(pk->data)+5,5);
+                    log_flush("MSG_TYPE_TRANSPOND %s \n",TO_ID);
                     rece_user_transpond(key,TO_ID,pk->data,pk->head.len);
                     break;
 				case MSG_TYPE_HEART:
