@@ -29,7 +29,7 @@ JNIEXPORT void JNICALL Java_com_fu_server_ServerLib_closeServer
  * Signature: (I[B)J
  */
 JNIEXPORT jlong JNICALL Java_com_fu_server_ServerLib_sendData
-  (JNIEnv *, jobject, jint, jbyteArray);
+  (JNIEnv *, jobject, jbyte,jint, jbyteArray);
 
 /*
  * Class:     com_fu_server_ServerLib

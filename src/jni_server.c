@@ -228,7 +228,7 @@ void jlog(int type,char *ch)
  * Signature: (I[B)J
  */
 JNIEXPORT jlong JNICALL Java_com_fu_server_ServerLib_sendData
-  (JNIEnv *env, jobject obj, jint fd, jbyteArray array)
+  (JNIEnv *env, jobject obj, jbyte type,jint fd, jbyteArray array)
   {
     ssize_t ret = 0;
     
@@ -237,7 +237,7 @@ JNIEXPORT jlong JNICALL Java_com_fu_server_ServerLib_sendData
     jbyte data[len];
     memcpy(data,j_bytes,len);
 
-    send_data_pack(fd, MSG_TYPE_DATA,(char *)data, len);
+    send_data_pack(fd, type,(char *)data, len);
 
     if(j_bytes)
     {
