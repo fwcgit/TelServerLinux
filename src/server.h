@@ -38,6 +38,8 @@ void rece_user_data(char *key,char *data,size_t len);
 
 void rece_user_str(char *key,char *data,size_t len);
 
+void rece_user_transpond(char *key,char *tokey,char *data,size_t len);
+
 int find_max_fd(void);
 
 void new_user_connect(int fd);

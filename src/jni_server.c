@@ -92,6 +92,28 @@ void rece_user_data(char *key,char *data,size_t len)
 	}
 }
 
+void rece_user_transpond(char *key,char *tokey,char *data,size_t len)
+{
+	int ret;
+	JNIEnv *env;
+	if(NULL != gVM)
+	{
+		ret = (*gVM)->AttachCurrentThread(gVM,(void **)&env,NULL);
+		if(ret == 0 && NULL != env)
+		{
+			jclass cls = (*env)->GetObjectClass(env,gObj);
+			jmethodID mid =(*env)->GetMethodID(env,cls,"receUserTranspond","(Ljava/lang/String;Ljava/lang/String;[BI)V");
+
+			jbyteArray array = (*env)->NewByteArray(env,len);
+			(*env)->SetByteArrayRegion(env,array,0,len,(jbyte *)data);
+
+			(*env)->CallVoidMethod(env,gObj,mid,key,tokey,array,len);
+			(*gVM)->DetachCurrentThread(gVM);
+
+		}
+	}
+}
+
 void client_disconnect(int fd)
 {
 	int ret;

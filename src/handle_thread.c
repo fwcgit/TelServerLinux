@@ -28,6 +28,7 @@ void* handle_msg(void *args)
 {
     package *pk         = NULL;
     int ret             = 0;
+    char TO_ID[6];
        
     while(is_run())
     { 
@@ -48,6 +49,9 @@ void* handle_msg(void *args)
                     rece_user_str(key,pk->data,pk->head.len);
                     break;
                 case MSG_TYPE_TRANSPOND:
+                    memset(TO_ID,0,6);
+                    memcpy(TO_ID,(pk->data)+5,5);
+                    rece_user_transpond(key,TO_ID,pk->data,pk->head.len);
                     break;
 				case MSG_TYPE_HEART:
                     user_heartbeat(pk->fd,key);
