@@ -166,9 +166,9 @@ void* read_client(void *args)
                                                 package *pk = (package *)malloc(sizeof(package));
                                                 memset(pk,0,sizeof(package));
                                                 
-                                                pk->head.type = *(buff+KEY_LEN);
+                                                pk->head.type = *(buff+5);
                                                 pk->head.len = user_data_len;
-                                                memset(pk->head.key,0,6);
+                                                memset(pk->head.key,0,KEY_LEN+1);
                                                 memcpy(pk->head.key,data,KEY_LEN);
                             
                                                 pk->fd    = s_fd;

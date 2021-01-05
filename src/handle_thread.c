@@ -28,7 +28,7 @@ void* handle_msg(void *args)
 {
     package *pk         = NULL;
     int ret             = 0;
-    char TO_ID[6];
+    char TO_ID[KEY_LEN+1];
        
     while(is_run())
     { 
@@ -50,8 +50,8 @@ void* handle_msg(void *args)
                     break;
                 case MSG_TYPE_TRANSPOND:
                     log_flush("MSG_TYPE_TRANSPOND %s \n",key);
-                    memset(TO_ID,0,6);
-                    memcpy(TO_ID,(pk->data)+5,5);
+                    memset(TO_ID,0,KEY_LEN+1);
+                    memcpy(TO_ID,(pk->data)+KEY_LEN,KEY_LEN);
                     log_flush("MSG_TYPE_TRANSPOND %s \n",TO_ID);
                     rece_user_transpond(key,TO_ID,pk->data,pk->head.len);
                     break;

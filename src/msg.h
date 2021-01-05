@@ -15,7 +15,7 @@
 #define MSG_TYPE_HEART      0x04 //心跳
 #define MSG_TYPE_TRANSPOND  0X05 //转发
 #define FRAME_HEAD_SIZE 8
-#define KEY_LEN         5
+#define KEY_LEN         15
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -23,7 +23,7 @@ typedef struct m_head
 {
     char    		type;
     unsigned int 	len;
-    char            key[6];
+    char            key[16];
 }msg_head;
 
 typedef struct m_package
