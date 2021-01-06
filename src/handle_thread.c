@@ -52,7 +52,7 @@ void* handle_msg(void *args)
                     log_flush("MSG_TYPE_TRANSPOND %s \n",key);
                     memset(TO_ID,0,KEY_LEN+1);
                     memcpy(TO_ID,(pk->data)+KEY_LEN,KEY_LEN);
-                    log_flush("MSG_TYPE_TRANSPOND %s \n",TO_ID);
+                    log_flush("MSG_TYPE_TRANSPOND %s %d\n",TO_ID,pk->head.len);
                     rece_user_transpond(key,TO_ID,pk->data,pk->head.len);
                     break;
 				case MSG_TYPE_HEART:
