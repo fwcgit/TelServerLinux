@@ -237,7 +237,7 @@ JNIEXPORT jlong JNICALL Java_com_fu_server_ServerLib_sendData
     jbyte data[len];
     memcpy(data,j_bytes,len);
 
-    send_data_pack(fd, type,(char *)data, len);
+    ret = send_data_pack(fd, type,(char *)data, len);
 
     if(j_bytes)
     {
